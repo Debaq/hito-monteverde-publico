@@ -1,0 +1,34 @@
+{
+  "diccionario": "DICT_4X4_100",
+  "placa_mm": 52.0,
+  "placas": {
+    "LCDCP-MV-00004": 0,
+    "LCDCP-MV-00005": 1,
+    "LCDCP-MV-00008": 2,
+    "LCDCP-MV-00011": 3,
+    "LCDCP-MV-00152": 4,
+    "LCDCP-MV-00171": 5,
+    "LCDCP-MV-00200": 6,
+    "LCDCP-MV-01377": 7,
+    "LCDCP-MV-01821": 8,
+    "LCDCP-MV-01892": 9,
+    "LCDCP-MV-01898": 10,
+    "LCDCP-MV-01934": 11,
+    "LCDCP-MV-02112": 12,
+    "LCDCP-MV-02115": 13,
+    "LCDCP-MV-01894": 14
+  },
+  "suelo": {
+    "LCDCP-MV-02115": {
+      "id": 92,
+      "lado_mm": 450.0
+    }
+  },
+  "saltos": {
+    "panorama": {
+      "id": 75,
+      "lado_mm": 45.0,
+      "destino": "panorama.html"
+    }
+  }
+}

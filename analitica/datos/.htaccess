@@ -1,0 +1,8 @@
+# Los datos de visitas no se sirven nunca. Además cada archivo abre con una línea PHP
+# que corta la respuesta, por si este archivo se ignora.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Deny from all
+</IfModule>

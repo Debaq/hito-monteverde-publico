@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Monte Verde — Ruta interactiva</title>
+<meta name="theme-color" content="#16110C">
+<link rel="icon" href="assets/marca/icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/marca/icono.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hito Monte Verde">
+<meta property="og:locale" content="es_CL">
+<meta property="og:title" content="Monte Verde — Ruta interactiva">
+<meta property="og:description" content="Colección arqueológica de Monte Verde: piezas en 3D y fotografía, catálogo y recorrido del sitio.">
+<meta property="og:image" content="assets/marca/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Colección arqueológica de Monte Verde: piezas en 3D y fotografía, catálogo y recorrido del sitio.">
+<link rel="stylesheet" href="assets/css/app.css?v=41">
+<style>
+  .kicker { display: inline-flex; margin-bottom: 18px; }
+  .cifras { display: flex; justify-content: center; gap: 34px; flex-wrap: wrap; margin-top: 26px; }
+  .cifra b { display: block; font-family: var(--serif); font-size: 30px; color: var(--ochre-light); font-weight: 600; }
+  .cifra span { font-size: 12.5px; color: var(--sand-500); letter-spacing: .04em; }
+  .accesos { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 30px; }
+  .acceso { display: flex; flex-direction: column; gap: 7px; text-decoration: none; color: inherit;
+            transition: border-color var(--t-base), transform var(--t-base); }
+  .acceso:hover { border-color: var(--ochre); transform: translateY(-3px); }
+  .acceso .ic { width: 38px; height: 38px; border-radius: 11px; background: rgba(208,131,3,.14);
+                display: grid; place-items: center; color: var(--ochre-light); margin-bottom: 4px; }
+  .acceso .ic svg { width: 20px; height: 20px; }
+  .acceso p { margin: 0; font-size: 13.5px; color: var(--sand-500); }
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filtros .chip { cursor: pointer; border: 1px solid transparent; }
+  .filtros .chip[aria-pressed="false"] { background: transparent; color: var(--sand-500); border-color: var(--line); }
+
+  /* herramientas internas: no son parte del recorrido, van al pie y se ven como tales */
+  .taller { margin-top: 46px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .taller h2 { font-size: 17px; }
+  .taller > p { font-size: 13px; color: var(--sand-500); margin: 5px 0 14px; }
+  .taller .grid { grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); }
+  .taller a { display: block; padding: 13px 15px; border: 1px solid var(--line);
+              border-radius: var(--radius); background: var(--soil-mid); text-decoration: none;
+              transition: border-color var(--t-fast); }
+  .taller a:hover { border-color: var(--ochre); }
+  .taller b { display: block; color: var(--cream); font-family: var(--serif); font-weight: 600;
+              font-size: 14.5px; margin-bottom: 3px; }
+  .taller span { font-size: 12.5px; color: var(--sand-500); line-height: 1.45; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="mark">Monte <em>Verde</em></span>
+  <span class="spacer"></span>
+  <a class="chip ghost" href="encuesta.html">Encuesta</a>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="chip kicker">Ruta interactiva</span>
+    <h1>La colección de Monte Verde,<br>de vuelta en su territorio</h1>
+    <p class="lead">
+      Evidencia de presencia humana de hace 14.500 años, custodiada hoy en el Laboratorio y
+      Depósito de Conservación de la UACh en Puerto Montt. Apunta el marcador de cada estación
+      con tu teléfono, o explora las piezas desde aquí.
+    </p>
+    <div class="cifras">
+      <div class="cifra"><b id="nPiezas">—</b><span>PIEZAS EN LA RUTA</span></div>
+      <div class="cifra"><b id="n3d">—</b><span>CON MODELO 3D</span></div>
+      <div class="cifra"><b>2.384</b><span>PIEZAS REGISTRADAS</span></div>
+      <div class="cifra"><b>14.500</b><span>AÑOS A.P.</span></div>
+    </div>
+  </section>
+
+  <div class="accesos">
+    <a class="card acceso" href="panorama.html">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="12" rx="9" ry="5.5"/><path d="M12 6.5v11M3.4 10.5h17.2"/></svg></span>
+      <h3>El sitio en 360°</h3>
+      <p>Recorrido del valle de Chinchihuapi con el giroscopio del teléfono.</p>
+    </a>
+    <a class="card acceso" href="catalogo.html">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v18H6.5A2.5 2.5 0 0 1 4 18.5z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H12v18h5.5a2.5 2.5 0 0 0 2.5-2.5z"/></svg></span>
+      <h3>Catálogo</h3>
+      <p><span id="nPaginas">Todas las</span> páginas para hojear en pantalla, o descargar completo.</p>
+    </a>
+    <a class="card acceso" href="visor.html">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.8 20.5 7v10L12 21.2 3.5 17V7z"/><path d="M3.5 7 12 11.4 20.5 7M12 11.4V21"/></svg></span>
+      <h3>Piezas en 3D</h3>
+      <p>Gira los modelos, acércalos y míralos con luz rasante.</p>
+    </a>
+    <a class="card acceso" href="ar.html">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M12 8.5 16 11v4.5L12 18l-4-2.5V11z"/></svg></span>
+      <h3>Realidad aumentada</h3>
+      <p>Apunta a cualquier código de la ruta y la pieza aparece sobre él.</p>
+    </a>
+    <a class="card acceso" href="encuesta.html">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l2 2 4-4"/><rect x="4" y="4" width="16" height="16" rx="3"/></svg></span>
+      <h3>Encuesta</h3>
+      <p>Unas preguntas al terminar el recorrido. Nos sirve para mejorarlo.</p>
+    </a>
+    <a class="card acceso" href="libro.html">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 8h6M9 11.5h4"/></svg></span>
+      <h3>Libro de visitas</h3>
+      <p>Deja lo que te llevas de Monte Verde y lee lo que escribieron otros.</p>
+    </a>
+  </div>
+
+  <div class="section-title"><h2>Piezas de la ruta</h2></div>
+
+  <div class="filtros" id="filtros">
+    <button class="chip" data-f="todas" aria-pressed="true">Todas</button>
+    <button class="chip" data-f="3d" aria-pressed="false">Con 3D</button>
+    <button class="chip" data-f="litico" aria-pressed="false">Lítico</button>
+    <button class="chip" data-f="oseo" aria-pressed="false">Óseo</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</main>
+
+<section class="wrap taller">
+  <h2>Herramientas de trabajo</h2>
+  <p>No son parte del recorrido del visitante: sirven para preparar y verificar el material.
+     Quedan a la vista mientras estamos ajustando el paseo.</p>
+  <div class="grid">
+    <a href="debug/banco.html">
+      <b>Banco de trabajo</b>
+      <span>Cualquier modelo del sitio: marcar puntos con nombre, medir en milímetros
+            y sacarlo todo en JSON.</span></a>
+    <a href="ar.html?debug=1">
+      <b>Realidad aumentada con ajustes</b>
+      <span>Cámara, marcadores y el panel para anotar cómo se apoya cada pieza.</span></a>
+    <a href="visor.html?debug=1">
+      <b>Visor con ajustes</b>
+      <span>Modelos con el panel de encuadre y acercamiento pieza por pieza.</span></a>
+    <a href="debug/pano-debug.html">
+      <b>Ajuste de la panorámica</b>
+      <span>Límites de giro y zoom del 360, con grabación de recorrido.</span></a>
+    <a href="assets/impresos/">
+      <b>Impresos</b>
+      <span>Carteles de 140 × 214 mm, cubos ArUco y marcadores sueltos en PNG.</span></a>
+  </div>
+</section>
+
+<footer class="foot wrap">
+  Restitución e Instalación del Patrimonio Arqueológico Monte Verde<br>
+  GORE Los Lagos · SERPAT · Universidad Austral de Chile, Sede Puerto Montt
+</footer>
+
+<script type="module">
+import { cargarCatalogo, ruta, tieneModelo } from './assets/js/catalogo.js?v=41';
+
+import { ultimaPieza } from './assets/js/navegacion.js?v=41';
+import './assets/js/analitica.js?v=41';
+import './assets/js/offline.js?v=41';
+const vista = ultimaPieza();
+if (vista) {
+  const a = document.createElement('a');
+  a.className = 'chip';
+  a.href = `pieza.html?id=${encodeURIComponent(vista)}`;
+  a.textContent = 'Seguir donde ibas';
+  document.querySelector('.topbar .spacer').after(a);
+}
+
+const esc = t => String(t ?? '').replace(/[<>&"]/g, c => ({ '<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;' }[c]));
+const grid = document.getElementById('grid');
+
+const cat = await cargarCatalogo();
+document.getElementById('nPiezas').textContent = cat.total_piezas;
+document.getElementById('n3d').textContent = cat.con_modelo_3d;
+
+// el número de páginas lo manda el manifiesto del catálogo, no el texto de esta página
+fetch('assets/data/catalogo-paginas.json')
+  .then(r => r.ok ? r.json() : null)
+  .then(m => { if (m?.paginas?.length) document.getElementById('nPaginas').textContent = `Las ${m.paginas.length}`; })
+  .catch(() => {});
+
+const tarjeta = p => `
+  <a class="card piece" href="pieza.html?id=${encodeURIComponent(p.codigo)}">
+    <div class="thumb">
+      <img src="${esc(ruta(p.media.imagen_movil))}" alt="" loading="lazy" decoding="async">
+      ${tieneModelo(p) ? '<span class="chip tag">3D</span>' : ''}
+    </div>
+    <div class="body">
+      <div class="code">${esc(p.codigo)}</div>
+      <h3>${esc(p.denominacion)}</h3>
+      <div class="meta">${esc(p.tipo_objeto || '')}</div>
+    </div>
+  </a>`;
+
+const filtrar = f => cat.piezas.filter(p => {
+  const m = (p.categoria_material || '').toLowerCase();
+  if (f === '3d') return tieneModelo(p);
+  if (f === 'litico') return m.includes('lít') || m.includes('lit');
+  if (f === 'oseo') return m.includes('óse') || m.includes('ose') || m.includes('hues');
+  return true;
+});
+
+const pintar = f => { grid.innerHTML = filtrar(f).map(tarjeta).join(''); };
+pintar('todas');
+
+document.getElementById('filtros').addEventListener('click', e => {
+  const b = e.target.closest('[data-f]');
+  if (!b) return;
+  for (const x of document.querySelectorAll('#filtros .chip')) x.setAttribute('aria-pressed', String(x === b));
+  pintar(b.dataset.f);
+});
+</script>
+</body>
+</html>

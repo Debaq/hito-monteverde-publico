@@ -1,0 +1,22 @@
+{
+  "pieza": "LCDCP-MV-02115",
+  "px": [
+    897,
+    1135
+  ],
+  "mm_por_px": 0.2751,
+  "z_min_mm": 1.374,
+  "z_max_mm": 112.209,
+  "plano": [
+    0.0001555656490381807,
+    0.050999339669942856,
+    40.5532341003418
+  ],
+  "bbox_mm": [
+    246.8,
+    312.2,
+    110.8
+  ],
+  "origen": "malla \"huella clean\" entregada por diseño (recortada, con textura)",
+  "orientacion": "fila 0 = Z mínimo de la malla; altura en Y"
+}

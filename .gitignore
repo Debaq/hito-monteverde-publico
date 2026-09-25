@@ -1,0 +1,21 @@
+# Originales fuera del proyecto: se indican con MV_ORIGINALES. Si alguien los deja
+# dentro, que no entren al repositorio.
+originales/
+INSUMOS/
+
+# Salidas regenerables
+assets/impresos/placa-*.pdf
+assets/impresos/cubo-*.pdf
+
+# Analítica: la clave y las visitas viven sólo en el servidor
+analitica/config.php
+# visitas, libro de visitas y encuesta: todos son .php con la línea de guarda
+analitica/datos/*.php
+
+__pycache__/
+*.pyc
+*.bak
+.DS_Store
+
+# Registro que deja el plotter al cortar
+assets/impresos/vinilo/*.log

@@ -1,0 +1,582 @@
+{
+  "proyecto": "Restitución e Instalación del Patrimonio Arqueológico Monte Verde",
+  "total_piezas": 15,
+  "con_modelo_3d": 10,
+  "piezas": [
+    {
+      "codigo": "LCDCP-MV-00004",
+      "pagina": 36,
+      "denominacion": "Punta de proyectil",
+      "tipo_objeto": "Instrumento bifacial",
+      "categoria_material": "Lítico",
+      "descripcion": "Punta de proyectil bifacial",
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 9.9,
+        "ancho": 1.6,
+        "espesor": 0.9,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "9,9 x 1,6 x 0,9",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-00004.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-00004.webp",
+        "modelo": "assets/models/LCDCP-MV-00004.glb",
+        "modelo_movil": "assets/models/mobile/LCDCP-MV-00004.glb"
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null,
+        "dx": 43,
+        "dy": 62,
+        "dz": 0,
+        "rx": -102,
+        "ry": 178,
+        "rz": 0,
+        "escala": 6
+      },
+      "camara": {
+        "phi": 30,
+        "giro": 60,
+        "rango": 40,
+        "libre": true
+      },
+      "visor_relieve": "visor.html?id=LCDCP-MV-00004"
+    },
+    {
+      "codigo": "LCDCP-MV-00005",
+      "pagina": 37,
+      "denominacion": "Bastón lítico",
+      "tipo_objeto": "Instrumento pulido, probable punzón o perforador de piedra pizarra",
+      "categoria_material": "Lítico",
+      "descripcion": null,
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 20.0,
+        "ancho": 1.5,
+        "espesor": 1.2,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "20 x 1,5 x 1,2",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-00005.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-00005.webp",
+        "modelo": null,
+        "modelo_movil": null
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null
+      }
+    },
+    {
+      "codigo": "LCDCP-MV-00008",
+      "pagina": 37,
+      "denominacion": "Guijarro con surco",
+      "tipo_objeto": "Posible artefacto pulido",
+      "categoria_material": "Lítico",
+      "descripcion": "Guijarro con modificación cultural, posible piedra de honda",
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 2.3,
+        "ancho": 1.8,
+        "espesor": 1.9,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "2,3 x 1,8 x 1,9",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-00008.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-00008.webp",
+        "modelo": "assets/models/LCDCP-MV-00008.glb",
+        "modelo_movil": "assets/models/mobile/LCDCP-MV-00008.glb"
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null,
+        "dx": 53,
+        "dy": 68,
+        "dz": 0,
+        "rx": 93,
+        "ry": 148,
+        "rz": 0,
+        "escala": 5.404
+      },
+      "camara": {
+        "phi": 12,
+        "giro": 60,
+        "rango": 40,
+        "libre": true
+      },
+      "visor_relieve": "visor.html?id=LCDCP-MV-00008"
+    },
+    {
+      "codigo": "LCDCP-MV-00011",
+      "pagina": 38,
+      "denominacion": "Preforma o matriz bifacial de cuarcita",
+      "tipo_objeto": "Biface",
+      "categoria_material": "Lítico",
+      "descripcion": "Preforma o matriz bifacial, instrumento sin terminar",
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 14.7,
+        "ancho": 6.2,
+        "espesor": 4.3,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "14,7 x 6,2 x 4,3",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-00011.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-00011.webp",
+        "modelo": null,
+        "modelo_movil": null
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null
+      }
+    },
+    {
+      "codigo": "LCDCP-MV-00152",
+      "pagina": 41,
+      "denominacion": "Punta de proyectil pedunculada",
+      "tipo_objeto": "Instrumento bifacial",
+      "categoria_material": "Lítico",
+      "descripcion": "Punta de proyectil pedunculada con aletas",
+      "funcion": null,
+      "sitio": "Chinchihuapi I",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 8.7,
+        "ancho": 2.9,
+        "espesor": 0.7,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "8,7 x 2,9 x 0,7",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-00152.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-00152.webp",
+        "modelo": "assets/models/LCDCP-MV-00152.glb",
+        "modelo_movil": "assets/models/mobile/LCDCP-MV-00152.glb"
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null,
+        "dx": -4,
+        "dy": 6,
+        "dz": 0,
+        "rx": 78,
+        "ry": -179,
+        "rz": 0,
+        "escala": 2.735
+      },
+      "camara": {
+        "phi": 30,
+        "giro": 60,
+        "rango": 40,
+        "libre": true
+      },
+      "visor_relieve": "visor.html?id=LCDCP-MV-00152"
+    },
+    {
+      "codigo": "LCDCP-MV-00171",
+      "pagina": 41,
+      "denominacion": "Punzón, fragmento",
+      "tipo_objeto": "Artefacto tallado",
+      "categoria_material": "Lítico",
+      "descripcion": "Instrumento de perforación",
+      "funcion": null,
+      "sitio": "Chinchihuapi I",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 8.3,
+        "ancho": 1.0,
+        "espesor": 0.6,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "8,3 x 1 x 0,6",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-00171.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-00171.webp",
+        "modelo": "assets/models/LCDCP-MV-00171.glb",
+        "modelo_movil": "assets/models/mobile/LCDCP-MV-00171.glb"
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null,
+        "dx": 67,
+        "dy": 71,
+        "dz": 0,
+        "rx": -106,
+        "ry": -10,
+        "rz": 0,
+        "escala": 3.515
+      },
+      "camara": {
+        "phi": 30,
+        "giro": 60,
+        "rango": 40,
+        "libre": true
+      },
+      "visor_relieve": "visor.html?id=LCDCP-MV-00171"
+    },
+    {
+      "codigo": "LCDCP-MV-00200",
+      "pagina": 43,
+      "denominacion": "Raedera bifacial",
+      "tipo_objeto": "Instrumento bifacial de basalto",
+      "categoria_material": "Lítico",
+      "descripcion": "Artefacto para corte o raspado de cuero, carne o madera",
+      "funcion": null,
+      "sitio": "Monte Verde I",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 9.4,
+        "ancho": 5.8,
+        "espesor": 3.9,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "9,4 x 5,8 x 3,9",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-00200.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-00200.webp",
+        "modelo": "assets/models/LCDCP-MV-00200.glb",
+        "modelo_movil": "assets/models/mobile/LCDCP-MV-00200.glb"
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null,
+        "dx": 46,
+        "dy": 88,
+        "dz": 0,
+        "rx": 71,
+        "ry": 175,
+        "rz": 0,
+        "escala": 2.394
+      },
+      "camara": {
+        "phi": 20,
+        "giro": 60,
+        "rango": 40,
+        "libre": true
+      },
+      "visor_relieve": "visor.html?id=LCDCP-MV-00200"
+    },
+    {
+      "codigo": "LCDCP-MV-01377",
+      "pagina": 50,
+      "denominacion": "Yesquero",
+      "tipo_objeto": "Artefacto de madera",
+      "categoria_material": "Madera",
+      "descripcion": "Pieza de madera con orificio para generar fricción",
+      "funcion": "Yesquero",
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 20.9,
+        "ancho": 8.7,
+        "espesor": 8.4,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "20,9 x 8,7 x 8,4",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-01377.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-01377.webp",
+        "modelo": null,
+        "modelo_movil": null
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null
+      }
+    },
+    {
+      "codigo": "LCDCP-MV-01821",
+      "pagina": 59,
+      "denominacion": "Nudos",
+      "tipo_objeto": "Fibra vegetal con nudo de tipo doble S",
+      "categoria_material": "Arqueobotánica",
+      "descripcion": "Restos de juncácea",
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": null,
+        "ancho": null,
+        "espesor": null,
+        "unidad": null
+      },
+      "dimensiones_texto": null,
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-01821.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-01821.webp",
+        "modelo": "assets/models/LCDCP-MV-01821.glb",
+        "modelo_movil": "assets/models/mobile/LCDCP-MV-01821.glb"
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null,
+        "dx": 56,
+        "dy": 22,
+        "dz": 0,
+        "rx": 85,
+        "ry": 12,
+        "rz": 0,
+        "escala": 0.142
+      },
+      "camara": {
+        "phi": 45,
+        "giro": 55,
+        "rango": 32,
+        "libre": true
+      },
+      "visor_relieve": "visor.html?id=LCDCP-MV-01821"
+    },
+    {
+      "codigo": "LCDCP-MV-01892",
+      "pagina": 53,
+      "denominacion": "Molar",
+      "tipo_objeto": "Diente de Gonfoterio",
+      "categoria_material": "Óseo",
+      "descripcion": "Resto óseo no artefactual, Notiomastodon platensis",
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 24.0,
+        "ancho": 10.0,
+        "espesor": 19.0,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "24 x 10 x 19",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-01892.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-01892.webp",
+        "modelo": "assets/models/LCDCP-MV-01892.glb",
+        "modelo_movil": "assets/models/mobile/LCDCP-MV-01892.glb"
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null,
+        "dx": 38,
+        "dy": 4,
+        "dz": 0,
+        "rx": -80,
+        "ry": -8,
+        "rz": 0,
+        "escala": 0.927
+      },
+      "camara": {
+        "phi": 30,
+        "giro": 60,
+        "rango": 40,
+        "libre": true
+      },
+      "visor_relieve": "visor.html?id=LCDCP-MV-01892"
+    },
+    {
+      "codigo": "LCDCP-MV-01898",
+      "pagina": 58,
+      "denominacion": "Colmillo",
+      "tipo_objeto": "Defensa de Gonfoterio",
+      "categoria_material": "Óseo",
+      "descripcion": "Defensa con un extremo termoalterado por fuego, posiblemente en forma intencional, Notiomastodon platensis",
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 23.0,
+        "ancho": 8.2,
+        "espesor": 4.0,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "23 x 8,2 x 4",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-01898.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-01898.webp",
+        "modelo": "assets/models/LCDCP-MV-01898.glb",
+        "modelo_movil": "assets/models/mobile/LCDCP-MV-01898.glb"
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null,
+        "dx": 61,
+        "dy": 33,
+        "dz": 0,
+        "rx": -108,
+        "ry": 177,
+        "rz": 0,
+        "escala": 1.115
+      },
+      "camara": {
+        "phi": 30,
+        "giro": 60,
+        "rango": 40,
+        "libre": true
+      },
+      "visor_relieve": "visor.html?id=LCDCP-MV-01898"
+    },
+    {
+      "codigo": "LCDCP-MV-01934",
+      "pagina": 51,
+      "denominacion": "Escápula",
+      "tipo_objeto": "Hueso de Paleolama",
+      "categoria_material": "Óseo",
+      "descripcion": "Resto óseo no artefactual, Escápula derecha, Paleolama",
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": 31.8,
+        "ancho": 10.3,
+        "espesor": 19.8,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "31,8 x 10,3 x 19,8",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-01934.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-01934.webp",
+        "modelo": "assets/models/LCDCP-MV-01934.glb",
+        "modelo_movil": "assets/models/mobile/LCDCP-MV-01934.glb"
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null,
+        "dx": 29,
+        "dy": 29,
+        "dz": 0,
+        "rx": 27,
+        "ry": 165,
+        "rz": 0,
+        "escala": 1.307
+      },
+      "camara": {
+        "phi": 30,
+        "giro": 60,
+        "rango": 40,
+        "libre": true
+      },
+      "visor_relieve": "visor.html?id=LCDCP-MV-01934"
+    },
+    {
+      "codigo": "LCDCP-MV-02112",
+      "pagina": 64,
+      "denominacion": "Colmillo",
+      "tipo_objeto": "Defensa de Gonfoterio",
+      "categoria_material": "Óseo",
+      "descripcion": "Resto óseo no artefactual, Notiomastodon platensis",
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": null,
+        "ancho": null,
+        "espesor": null,
+        "unidad": null
+      },
+      "dimensiones_texto": null,
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-02112.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-02112.webp",
+        "modelo": null,
+        "modelo_movil": null
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null
+      }
+    },
+    {
+      "codigo": "LCDCP-MV-02115",
+      "pagina": 63,
+      "denominacion": "Huella",
+      "tipo_objeto": "Huella humana",
+      "categoria_material": "Icnofósil",
+      "descripcion": "Negativo de una posible huella humana, sus dimensiones sugieren un individuo infantil",
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": null,
+        "ancho": null,
+        "espesor": null,
+        "unidad": null
+      },
+      "dimensiones_texto": null,
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-02115.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-02115.webp",
+        "modelo": "assets/models/LCDCP-MV-02115.glb",
+        "modelo_movil": "assets/models/mobile/LCDCP-MV-02115.glb"
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null,
+        "dx": -141,
+        "dy": 54,
+        "dz": 0,
+        "rx": 99,
+        "ry": -4,
+        "rz": 5,
+        "escala": 2.34
+      },
+      "mediciones": "assets/data/huella-contorno.json",
+      "visor_relieve": "visor.html?id=LCDCP-MV-02115",
+      "_nota_interna": {
+        "texto": "Según el equipo: lo escaneado es la huella levantada en bloque, no un molde; el bloque es frágil y no se puede mover.",
+        "fuente": "comentario verbal del equipo en conversación, sin verificar",
+        "publicar": false
+      },
+      "camara": {
+        "phi": 30,
+        "giro": 46,
+        "rango": 30
+      },
+      "nube": {
+        "modo": "plano",
+        "rango_mm": [
+          -40,
+          6
+        ]
+      },
+      "contorno": "assets/data/huella-contorno.json",
+      "molde": "assets/models/huella-molde.glb",
+      "relieve": true
+    },
+    {
+      "codigo": "LCDCP-MV-01894",
+      "pagina": 55,
+      "denominacion": "Ilion",
+      "tipo_objeto": "Hueso de gonfoterio",
+      "categoria_material": "Óseo",
+      "descripcion": "Resto óseo no artefactual, Notiomastodon platensis",
+      "funcion": null,
+      "sitio": "Monte Verde II",
+      "localidad": "Estero Chinchihuapi",
+      "dimensiones": {
+        "largo": null,
+        "ancho": null,
+        "espesor": null,
+        "unidad": "cm"
+      },
+      "dimensiones_texto": "23 x 9 x 5 / 7,8 x 2,9 x 0,6",
+      "media": {
+        "imagen": "assets/images/LCDCP-MV-01894.webp",
+        "imagen_movil": "assets/images/mobile/LCDCP-MV-01894.webp",
+        "modelo": null,
+        "modelo_movil": null
+      },
+      "ar": {
+        "marcador": null,
+        "target_index": null
+      }
+    }
+  ]
+}

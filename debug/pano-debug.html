@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Pano debug — Monte Verde</title>
+<style>
+  :root { --bg:#0d0f12; --panel:#15181d; --line:#2a2f37; --txt:#e6e8ec; --dim:#8b93a1; --acc:#7cc4ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:13px/1.4 ui-monospace,monospace; overflow:hidden; }
+  #view { position:fixed; inset:0; touch-action:none; cursor:grab; }
+  #view:active { cursor:grabbing; }
+  #hud { position:fixed; top:10px; left:10px; background:rgba(13,15,18,.82); border:1px solid var(--line);
+         border-radius:6px; padding:8px 10px; pointer-events:none; white-space:pre; font-size:12px; }
+  #hud b { color:var(--acc); font-weight:600; }
+  #panel { position:fixed; top:10px; right:10px; width:290px; max-height:calc(100vh - 20px); overflow:auto;
+           background:rgba(21,24,29,.94); border:1px solid var(--line); border-radius:8px; padding:12px; }
+  #panel h2 { margin:0 0 10px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+  .row { margin:0 0 9px; }
+  .row label { display:flex; justify-content:space-between; gap:8px; margin-bottom:3px; font-size:11px; color:var(--dim); }
+  .row label span { color:var(--txt); }
+  .row input[type=range] { width:100%; accent-color:var(--acc); }
+  .chk { display:flex; align-items:center; gap:7px; margin:0 0 8px; font-size:12px; }
+  button { width:100%; padding:8px; margin-top:4px; background:#1e2530; color:var(--txt);
+           border:1px solid var(--line); border-radius:5px; font:inherit; cursor:pointer; }
+  button:hover { border-color:var(--acc); }
+  hr { border:0; border-top:1px solid var(--line); margin:11px 0; }
+  #out { margin-top:8px; background:#0b0d10; border:1px solid var(--line); border-radius:5px;
+         padding:8px; font-size:11px; white-space:pre-wrap; word-break:break-all; color:var(--dim); max-height:150px; overflow:auto; }
+  #flags { position:fixed; inset:0; pointer-events:none; opacity:1; transition:opacity .18s ease; }
+  #flags.moving { opacity:0; }
+  .flag { position:absolute; transform:translate(-50%,-100%); display:flex; flex-direction:column;
+          align-items:center; pointer-events:none; }
+  .flag .txt { background:rgba(13,15,18,.88); border:1px solid var(--acc); color:var(--txt);
+               border-radius:4px; padding:3px 8px; font-size:12px; white-space:nowrap; }
+  .flag .line { width:1px; height:34px; background:var(--acc); }
+  .flag .dot { width:9px; height:9px; margin-top:-5px; border-radius:50%;
+               background:var(--acc); box-shadow:0 0 0 2px rgba(13,15,18,.85); }
+  .flag.sel .txt { border-color:#ffd166; color:#ffd166; }
+  .flag.sel .line, .flag.sel .dot { background:#ffd166; }
+  #pin.on { background:#13303d; border-color:var(--acc); color:var(--acc); }
+  #lista { margin-top:8px; font-size:11px; }
+  #lista .it { display:flex; gap:5px; margin-bottom:4px; align-items:center; }
+  #lista input { flex:1; min-width:0; background:#0b0d10; border:1px solid var(--line);
+                 color:var(--txt); border-radius:4px; padding:4px 6px; font:inherit; font-size:11px; }
+  #lista button { width:auto; margin:0; padding:4px 7px; font-size:11px; }
+  #bar { position:fixed; bottom:0; left:0; right:0; display:flex; gap:6px; padding:8px;
+         background:rgba(13,15,18,.92); border-top:1px solid var(--line); }
+  #bar button { width:auto; flex:1; margin:0; padding:10px 8px; }
+  #toggle { flex:0 0 auto !important; }
+  #rec.on { background:#3a1418; border-color:#ff5b6e; color:#ff8b98; }
+  #recinfo { margin-top:6px; font-size:11px; color:var(--dim); white-space:pre; }
+  #dot { position:fixed; top:10px; left:50%; transform:translateX(-50%); display:none;
+         align-items:center; gap:7px; background:rgba(58,20,24,.92); border:1px solid #ff5b6e;
+         color:#ff8b98; border-radius:20px; padding:6px 13px; font-size:12px; }
+  #dot.on { display:flex; }
+  #dot i { width:9px; height:9px; border-radius:50%; background:#ff5b6e; animation:blink 1s infinite; }
+  @keyframes blink { 50% { opacity:.25; } }
+  @media (max-width:760px) { #panel { width:auto; left:10px; top:auto; bottom:56px; max-height:46vh; } }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="hud">cargando…</div>
+<div id="dot"><i></i><span id="dottxt">grabando</span></div>
+<div id="flags"></div>
+
+<div id="panel">
+  <h2>Parámetros</h2>
+
+  <div class="row"><label>fov inicial (zoom)<span id="v_fov">23</span></label>
+    <input type="range" id="fov" min="15" max="110" step="1" value="23"></div>
+  <div class="row"><label>fov mín (zoom máx)<span id="v_fovMin">23</span></label>
+    <input type="range" id="fovMin" min="10" max="80" step="1" value="23"></div>
+  <div class="row"><label>fov máx (zoom mín)<span id="v_fovMax">45</span></label>
+    <input type="range" id="fovMax" min="40" max="120" step="1" value="45"></div>
+
+  <hr>
+  <div class="row"><label>pitch mín (mirar abajo)<span id="v_pitchMin">-46</span></label>
+    <input type="range" id="pitchMin" min="-90" max="0" step="1" value="-46"></div>
+  <div class="row"><label>pitch máx (mirar arriba)<span id="v_pitchMax">7</span></label>
+    <input type="range" id="pitchMax" min="0" max="90" step="1" value="7"></div>
+
+  <hr>
+  <div class="row"><label>yaw inicial<span id="v_yaw0">87</span></label>
+    <input type="range" id="yaw0" min="-180" max="180" step="1" value="87"></div>
+  <div class="chk"><input type="checkbox" id="yawLimit"><label for="yawLimit">limitar giro horizontal</label></div>
+  <div class="row"><label>rango yaw ±<span id="v_yawRange">40</span></label>
+    <input type="range" id="yawRange" min="10" max="180" step="5" value="40"></div>
+
+  <hr>
+  <div class="row"><label>sensibilidad arrastre<span id="v_sens">0.15</span></label>
+    <input type="range" id="sens" min="0.02" max="0.5" step="0.01" value="0.15"></div>
+  <div class="row"><label>inercia<span id="v_damp">0.88</span></label>
+    <input type="range" id="damp" min="0" max="0.97" step="0.01" value="0.88"></div>
+  <div class="row"><label>auto-giro (°/s)<span id="v_spin">0</span></label>
+    <input type="range" id="spin" min="0" max="8" step="0.5" value="0"></div>
+
+  <hr>
+  <div class="chk"><input type="checkbox" id="hires" checked><label for="hires">textura 4K (si no, 2K)</label></div>
+  <div class="chk"><input type="checkbox" id="patch"><label for="patch">parche foto real (A/B con tecla P)</label></div>
+  <div class="row"><label>opacidad del parche<span id="v_pop">100</span></label>
+    <input type="range" id="pop" min="0" max="100" step="5" value="100"></div>
+  <button id="goPatch">ir a la zona real</button>
+  <button id="soloReal">modo real</button>
+  <button id="lockFov">fijar este zoom y calcular límites</button>
+  <div id="lista"></div>
+  <div class="chk"><input type="checkbox" id="sky" checked><label for="sky">cielo sintético de fondo</label></div>
+  <div class="row"><label>cielo extra sobre la foto<span id="v_skyUp">25</span></label>
+    <input type="range" id="skyUp" min="0" max="60" step="5" value="25"></div>
+  <div class="row"><label>fondo sintético<span id="v_bg">100</span></label>
+    <input type="range" id="bg" min="0" max="100" step="5" value="100"></div>
+  <button id="gyro">activar giroscopio</button>
+  <hr>
+  <button id="rec">● grabar límites</button>
+  <button id="recapply" style="display:none">usar lo grabado</button>
+  <button id="recdrop" style="display:none">descartar</button>
+  <div id="recinfo">muévete libre mientras grabas:
+los extremos que alcances son los límites</div>
+  <hr>
+  <button id="copy">copiar valores</button>
+  <div id="out">—</div>
+</div>
+<div id="bar">
+  <button id="bModo">modo real</button>
+  <button id="bFijar">fijar zoom</button>
+  <button id="bRec">● grabar</button>
+  <button id="pin">pinchar</button>
+  <button id="bCopy">copiar</button>
+  <button id="toggle">panel</button>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"../assets/vendor/three/three.module.js"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+const canvas = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 100);
+
+const geo = new THREE.SphereGeometry(10, 64, 48);
+geo.scale(-1, 1, 1);                     // normales hacia adentro
+const mat = new THREE.MeshBasicMaterial();
+const sphere = new THREE.Mesh(geo, mat);
+scene.add(sphere);
+
+// --- parche de foto real, colocado por homografia sobre el equirect
+const PATCH = { x0:3029, y0:1762, x1:4783, y1:2902, W:7680, H:3840 };
+const pg = new THREE.SphereGeometry(9.9, 96, 64,
+  Math.PI * 2 * (PATCH.x0 / PATCH.W), Math.PI * 2 * ((PATCH.x1 - PATCH.x0) / PATCH.W),
+  Math.PI * (PATCH.y0 / PATCH.H),     Math.PI * ((PATCH.y1 - PATCH.y0) / PATCH.H));
+pg.scale(-1, 1, 1);
+const pmat = new THREE.MeshBasicMaterial({ transparent:true, depthWrite:false, opacity:1 });
+const patchMesh = new THREE.Mesh(pg, pmat);
+patchMesh.visible = false;
+scene.add(patchMesh);
+
+const loader = new THREE.TextureLoader();
+let texHi = null, texLo = null;
+function setTex(hi) {
+  const url = hi ? '../assets/pano/sitio-360-4k.webp' : '../assets/pano/sitio-360-2k.webp';
+  const cached = hi ? texHi : texLo;
+  if (cached) { mat.map = cached; mat.needsUpdate = true; return; }
+  loader.load(url, t => {
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    if (hi) texHi = t; else texLo = t;
+    mat.map = t; mat.needsUpdate = true;
+  });
+}
+setTex(true);
+loader.load('../assets/pano/parche-real.webp', t => {
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  pmat.map = t; pmat.needsUpdate = true;
+});
+
+const P = {};
+const ids = ['fov','fovMin','fovMax','pitchMin','pitchMax','yaw0','yawRange','sens','damp','spin'];
+for (const id of ids) {
+  const el = document.getElementById(id);
+  P[id] = parseFloat(el.value);
+  el.addEventListener('input', () => {
+    P[id] = parseFloat(el.value);
+    document.getElementById('v_' + id).textContent = el.value;
+    if (id === 'yaw0') { yaw = P.yaw0; vYaw = 0; }
+    if (id === 'fov') { fov = P.fov; }
+  });
+}
+P.yawLimit = false;
+document.getElementById('yawLimit').addEventListener('change', e => P.yawLimit = e.target.checked);
+document.getElementById('hires').addEventListener('change', e => setTex(e.target.checked));
+const chkPatch = document.getElementById('patch');
+chkPatch.addEventListener('change', e => patchMesh.visible = e.target.checked);
+document.getElementById('pop').addEventListener('input', e => {
+  pmat.opacity = e.target.value / 100;
+  document.getElementById('v_pop').textContent = e.target.value;
+});
+addEventListener('keydown', e => {
+  if (e.key === 'p' || e.key === 'P') { chkPatch.checked = !chkPatch.checked; patchMesh.visible = chkPatch.checked; }
+});
+// oscurecer / apagar el 360 sintetico
+document.getElementById('bg').addEventListener('input', e => {
+  const v = e.target.value / 100;
+  mat.color.setScalar(v); sphere.visible = v > 0;
+  if (v > 0) real.on = false;
+  document.getElementById('v_bg').textContent = e.target.value;
+});
+
+// direccion de camara (yaw/pitch) para un punto del equirect
+function dirAt(x, y) {
+  const phi = Math.PI * 2 * (x / PATCH.W), th = Math.PI * (y / PATCH.H);
+  const d = new THREE.Vector3(Math.cos(phi) * Math.sin(th), Math.cos(th), Math.sin(phi) * Math.sin(th));
+  return { yaw: THREE.MathUtils.radToDeg(Math.atan2(-d.x, -d.z)),
+           pitch: THREE.MathUtils.radToDeg(Math.asin(d.y)) };
+}
+
+// px de la foto por grado (horizontal): 3421 px reales sobre el ancho angular del parche
+const PX_POR_GRADO = 3421 / 82.22;
+function detalle() {                       // >=1 : hay pixel real de sobra ; <1 : se esta interpolando
+  const halfH = THREE.MathUtils.radToDeg(
+    Math.atan(Math.tan(THREE.MathUtils.degToRad(fov / 2)) * camera.aspect));
+  return (2 * halfH * PX_POR_GRADO) / (innerWidth * Math.min(devicePixelRatio, 2));
+}
+
+document.getElementById('lockFov').addEventListener('click', () => {
+  if (!real.on) { recinfo.textContent = 'activa "modo real" primero'; return; }
+  const halfV = fov / 2;
+  const halfH = THREE.MathUtils.radToDeg(
+    Math.atan(Math.tan(THREE.MathUtils.degToRad(halfV)) * camera.aspect));
+  const mY = Math.max(0, real.semiYaw - halfH);
+  const abajo = real.pitchC - real.semiPitch + halfV;
+  const arriba = real.sky ? real.pitchC + real.semiPitch + real.skyUp
+                          : real.pitchC + real.semiPitch - halfV;
+  setSlider('fov', Math.round(fov)); setSlider('fovMin', Math.round(fov)); setSlider('fovMax', Math.round(fov));
+  setSlider('yaw0', Math.round(real.yawC)); setSlider('yawRange', Math.round(mY));
+  document.getElementById('yawLimit').checked = P.yawLimit = true;
+  setSlider('pitchMin', Math.round(abajo)); setSlider('pitchMax', Math.round(arriba));
+  recinfo.textContent =
+    `zoom fijo fov ${fov.toFixed(0)}°  (${detalle().toFixed(2)}x pixel nativo)\n` +
+    `giro horizontal  ±${mY.toFixed(0)}°\n` +
+    `pitch  ${abajo.toFixed(0)}° … ${arriba.toFixed(0)}°` +
+    (mY < 3 ? '\n⚠ casi sin recorrido: achica el fov' : '');
+});
+
+document.getElementById('sky').addEventListener('change', e => {
+  real.sky = e.target.checked;
+  if (real.on) { sphere.visible = real.sky; mat.color.setScalar(real.sky ? 1 : 0); }
+});
+document.getElementById('skyUp').addEventListener('input', e => {
+  real.skyUp = +e.target.value;
+  document.getElementById('v_skyUp').textContent = e.target.value;
+});
+
+document.getElementById('soloReal').addEventListener('click', () => {
+  const c = dirAt((PATCH.x0 + PATCH.x1) / 2, (PATCH.y0 + PATCH.y1) / 2);
+  const a = dirAt(PATCH.x0, (PATCH.y0 + PATCH.y1) / 2);
+  const b = dirAt(PATCH.x1, (PATCH.y0 + PATCH.y1) / 2);
+  const semi = Math.abs(((b.yaw - a.yaw + 540) % 360) - 180) / 2;   // medio ancho en grados
+  const arriba = dirAt((PATCH.x0 + PATCH.x1) / 2, PATCH.y0).pitch;
+  const abajo  = dirAt((PATCH.x0 + PATCH.x1) / 2, PATCH.y1).pitch;
+
+  chkPatch.checked = true; patchMesh.visible = true;
+  real.sky = document.getElementById('sky').checked;
+  const bgv = real.sky ? 100 : 0;
+  document.getElementById('bg').value = bgv; mat.color.setScalar(bgv / 100); sphere.visible = real.sky;
+  document.getElementById('v_bg').textContent = String(bgv);
+
+  setSlider('yaw0', Math.round(c.yaw));
+  setSlider('yawRange', Math.max(10, Math.round(semi)));
+  document.getElementById('yawLimit').checked = P.yawLimit = true;
+  setSlider('pitchMin', Math.round(Math.min(arriba, abajo)));
+  setSlider('pitchMax', Math.round(Math.max(arriba, abajo)));
+  Object.assign(real, { on:true, yawC:c.yaw, semiYaw:semi,
+    pitchC:(arriba + abajo) / 2, semiPitch:Math.abs(arriba - abajo) / 2 });
+  const lleno = fovLleno();
+  // fov donde 1 px de pantalla = 1 px de foto: mas zoom que esto es interpolar
+  let f11 = 40;
+  for (let f = 80; f > 10; f -= 0.5) {
+    const hf = THREE.MathUtils.radToDeg(
+      2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(f / 2)) * camera.aspect));
+    if (hf * PX_POR_GRADO / (innerWidth * Math.min(devicePixelRatio, 2)) <= 1) { f11 = f; break; }
+  }
+  setSlider('fovMin', Math.round(f11));
+  setSlider('fovMax', Math.round(lleno));
+  yaw = c.yaw; pitch = c.pitch; fov = Math.min(lleno, f11); vYaw = vPitch = 0;
+  recinfo.textContent = `modo real: foto de 82° x 53°\nfov ${lleno.toFixed(0)}° la llena · ${f11.toFixed(0)}° es el 1:1 (tope de zoom)`;
+});
+
+document.getElementById('goPatch').addEventListener('click', () => {
+  // direccion real del centro del parche segun la geometria de la esfera (tras scale(-1,1,1))
+  const phi = Math.PI * 2 * ((PATCH.x0 + PATCH.x1) / 2 / PATCH.W);
+  const th  = Math.PI * ((PATCH.y0 + PATCH.y1) / 2 / PATCH.H);
+  const d = new THREE.Vector3(Math.cos(phi) * Math.sin(th), Math.cos(th), Math.sin(phi) * Math.sin(th));
+  yaw = THREE.MathUtils.radToDeg(Math.atan2(-d.x, -d.z));
+  pitch = THREE.MathUtils.radToDeg(Math.asin(d.y));
+  vYaw = vPitch = 0; fov = Math.max(P.fovMin, 45);
+  chkPatch.checked = true; patchMesh.visible = true;
+});
+
+const CONFIG = {            // valores fijados en debug — de aca sale la version final
+  fovInicial: 23, fovMin: 23, fovMax: 45,
+  pitchMin: -46, pitchMax: 7,
+  yawInicial: 87.4, yawLimitado: true, yawRango: 40,
+  sensibilidad: 0.15, inercia: 0.88, autoGiro: 0,
+};
+let yaw = CONFIG.yawInicial, pitch = -19.3, fov = CONFIG.fovInicial, vYaw = 0, vPitch = 0;
+
+// --- grabación de límites: durante REC no se aplica ningún clamp y se registra el recorrido
+// ventana del parche: los limites se recortan segun el fov para que nunca entre el vacio
+const real = { on:false, sky:true, skyUp:25, yawC:0, semiYaw:0, pitchC:0, semiPitch:0 };
+// fov maximo que todavia deja la foto cubriendo toda la pantalla (depende del aspecto)
+function fovLleno() {
+  const porAlto = 2 * real.semiPitch;
+  const porAncho = THREE.MathUtils.radToDeg(
+    2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(real.semiYaw)) / camera.aspect));
+  return Math.min(porAlto, porAncho);
+}
+const rec = { on:false, done:false, t0:0,
+  yawMin:0, yawMax:0, pitchMin:0, pitchMax:0, fovMin:0, fovMax:0 };
+const setSlider = (id, val) => {
+  const el = document.getElementById(id);
+  el.value = val; P[id] = parseFloat(el.value);
+  document.getElementById('v_' + id).textContent = el.value;
+};
+const btnRec = document.getElementById('rec');
+const btnApply = document.getElementById('recapply');
+const btnDrop = document.getElementById('recdrop');
+const recinfo = document.getElementById('recinfo');
+const dot = document.getElementById('dot');
+
+function recStart() {
+  Object.assign(rec, { on:true, done:false, t0:performance.now(),
+    yawMin:yaw, yawMax:yaw, pitchMin:pitch, pitchMax:pitch, fovMin:fov, fovMax:fov });
+  btnRec.textContent = '■ detener'; document.getElementById('bRec').textContent = '■ detener';
+  btnRec.classList.add('on');
+  btnApply.style.display = btnDrop.style.display = 'none';
+  dot.classList.add('on');
+}
+function recStop() {
+  rec.on = false; rec.done = true;
+  btnRec.textContent = '● grabar de nuevo'; document.getElementById('bRec').textContent = '● grabar';
+  btnRec.classList.remove('on');
+  btnApply.style.display = btnDrop.style.display = 'block';
+  dot.classList.remove('on');
+  const span = rec.yawMax - rec.yawMin;
+  recinfo.textContent =
+    `yaw    ${rec.yawMin.toFixed(0)}° … ${rec.yawMax.toFixed(0)}°  (${span.toFixed(0)}° de recorrido)\n` +
+    `pitch  ${rec.pitchMin.toFixed(0)}° … ${rec.pitchMax.toFixed(0)}°\n` +
+    `fov    ${rec.fovMin.toFixed(0)}° … ${rec.fovMax.toFixed(0)}°\n` +
+    (span >= 350 ? 'giro completo → sin límite horizontal' : 'giro parcial → límite horizontal');
+}
+btnRec.addEventListener('click', () => rec.on ? recStop() : recStart());
+btnDrop.addEventListener('click', () => {
+  rec.done = false;
+  btnApply.style.display = btnDrop.style.display = 'none';
+  recinfo.textContent = 'descartado';
+});
+btnApply.addEventListener('click', () => {
+  const span = rec.yawMax - rec.yawMin;
+  setSlider('pitchMin', Math.round(rec.pitchMin));
+  setSlider('pitchMax', Math.round(rec.pitchMax));
+  const fovSpan = rec.fovMax - rec.fovMin;
+  if (fovSpan >= 3) {                       // si no tocaste el zoom, no lo dejo clavado
+    setSlider('fovMin', Math.round(rec.fovMin));
+    setSlider('fovMax', Math.round(rec.fovMax));
+  }
+  if (span < 350) {
+    const c = (rec.yawMin + rec.yawMax) / 2;
+    setSlider('yaw0', Math.round(((c % 360) + 540) % 360 - 180));
+    setSlider('yawRange', Math.max(10, Math.round(span / 2)));
+    document.getElementById('yawLimit').checked = P.yawLimit = true;
+  } else {
+    document.getElementById('yawLimit').checked = P.yawLimit = false;
+  }
+  fov = THREE.MathUtils.clamp(fov, P.fovMin, P.fovMax);
+  btnApply.style.display = btnDrop.style.display = 'none';
+  recinfo.textContent = (fovSpan >= 3 ? '' : 'zoom sin cambios durante la grabación: dejo el rango actual\n')
+    + 'aplicado a los sliders — toca "copiar valores"';
+});
+let drag = false, lastX = 0, lastY = 0, gyroOn = false;
+
+const pos = e => e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
+const down = e => { drag = true; const p = pos(e); lastX = p.x; lastY = p.y; vYaw = vPitch = 0; };
+const move = e => {
+  if (!drag) return;
+  e.preventDefault();
+  const p = pos(e);
+  vYaw = -(p.x - lastX) * P.sens; vPitch = (p.y - lastY) * P.sens;
+  yaw += vYaw; pitch += vPitch; lastX = p.x; lastY = p.y;
+};
+const up = () => drag = false;
+canvas.addEventListener('mousedown', down); addEventListener('mousemove', move); addEventListener('mouseup', up);
+canvas.addEventListener('touchstart', down, { passive: true });
+canvas.addEventListener('touchmove', move, { passive: false });
+canvas.addEventListener('touchend', up);
+canvas.addEventListener('wheel', e => { e.preventDefault(); fov += e.deltaY * 0.05; }, { passive: false });
+
+let pinch0 = null;
+canvas.addEventListener('touchmove', e => {
+  if (e.touches.length !== 2) { pinch0 = null; return; }
+  const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+  if (pinch0) fov *= pinch0 / d;
+  pinch0 = d;
+}, { passive: true });
+
+// giroscopio (iOS exige gesto + permiso)
+let gyroQ = null;
+document.getElementById('gyro').addEventListener('click', async () => {
+  try {
+    if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+      const r = await DeviceOrientationEvent.requestPermission();
+      if (r !== 'granted') { document.getElementById('out').textContent = 'permiso denegado'; return; }
+    }
+    addEventListener('deviceorientation', e => {
+      if (e.alpha == null) return;
+      gyroQ = { a: e.alpha, b: e.beta, g: e.gamma };
+    });
+    gyroOn = true;
+    document.getElementById('gyro').textContent = 'giroscopio activo';
+  } catch (err) { document.getElementById('out').textContent = 'gyro: ' + err.message; }
+});
+
+document.getElementById('copy').addEventListener('click', () => {
+  const cfg = {
+    fovInicial: +fov.toFixed(1), fovMin: P.fovMin, fovMax: P.fovMax,
+    pitchMin: P.pitchMin, pitchMax: P.pitchMax,
+    yawInicial: +(((yaw % 360) + 540) % 360 - 180).toFixed(1),
+    yawLimitado: P.yawLimit, yawRango: P.yawLimit ? P.yawRange : null,
+    sensibilidad: P.sens, inercia: P.damp, autoGiro: P.spin,
+    banderitas: flags.map(f => ({ texto: f.texto, yaw: +f.yaw.toFixed(2), pitch: +f.pitch.toFixed(2) })),
+    grabado: rec.done ? {
+      yaw: [+rec.yawMin.toFixed(1), +rec.yawMax.toFixed(1)],
+      pitch: [+rec.pitchMin.toFixed(1), +rec.pitchMax.toFixed(1)],
+      fov: [+rec.fovMin.toFixed(1), +rec.fovMax.toFixed(1)],
+    } : null,
+  };
+  const s = JSON.stringify(cfg, null, 2);
+  document.getElementById('out').textContent = s;
+  navigator.clipboard?.writeText(s).catch(() => {});
+  console.log('[PANO]', s);
+});
+
+const t = document.getElementById('toggle'), panel = document.getElementById('panel');
+t.addEventListener('click', () => {
+  const hidden = panel.style.display === 'none';
+  panel.style.display = hidden ? 'block' : 'none';
+  t.textContent = hidden ? 'ocultar panel' : 'mostrar panel';
+});
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  if (real.on) { const l = fovLleno(); setSlider('fovMax', Math.round(l)); fov = Math.min(fov, l); }
+});
+dispatchEvent(new Event('resize'));
+
+// que hay realmente en pantalla: foto real, sintetico, o el borde entre ambos
+function viendo() {
+  if (!patchMesh.visible || !pmat.map) return 'SINTÉTICO (parche off)';
+  const halfV = fov / 2;
+  const halfH = THREE.MathUtils.radToDeg(
+    Math.atan(Math.tan(THREE.MathUtils.degToRad(halfV)) * camera.aspect));
+  const c = dirAt((PATCH.x0 + PATCH.x1) / 2, (PATCH.y0 + PATCH.y1) / 2);
+  const a = dirAt(PATCH.x0, (PATCH.y0 + PATCH.y1) / 2);
+  const b = dirAt(PATCH.x1, (PATCH.y0 + PATCH.y1) / 2);
+  const semiY = Math.abs(((b.yaw - a.yaw + 540) % 360) - 180) / 2;
+  const semiP = Math.abs(dirAt(0, PATCH.y0).pitch - dirAt(0, PATCH.y1).pitch) / 2;
+  const dy = Math.abs(((yaw - c.yaw + 540) % 360) - 180), dp = Math.abs(pitch - c.pitch);
+  if (dy + halfH <= semiY && dp + halfV <= semiP) return 'FOTO REAL';
+  if (dy - halfH >= semiY || dp - halfV >= semiP) return 'SINTÉTICO';
+  return 'BORDE (mezcla)';
+}
+
+for (const [bar, real] of [['bModo','soloReal'], ['bFijar','lockFov'], ['bRec','rec'], ['bCopy','copy']])
+  document.getElementById(bar).addEventListener('click', () => document.getElementById(real).click());
+
+// arranca ya dentro de la foto real, no en el relleno sintetico
+function arrancar() {
+  if (real.on) return;
+  document.getElementById('soloReal').click();        // activa parche + cielo + ventana del parche
+  setSlider('fov', CONFIG.fovInicial); setSlider('fovMin', CONFIG.fovMin); setSlider('fovMax', CONFIG.fovMax);
+  setSlider('pitchMin', CONFIG.pitchMin); setSlider('pitchMax', CONFIG.pitchMax);
+  setSlider('yaw0', Math.round(CONFIG.yawInicial)); setSlider('yawRange', CONFIG.yawRango);
+  document.getElementById('yawLimit').checked = P.yawLimit = CONFIG.yawLimitado;
+  yaw = CONFIG.yawInicial; pitch = -19.3; fov = CONFIG.fovInicial; vYaw = vPitch = 0;
+}
+loader.manager.onLoad = arrancar;
+setTimeout(arrancar, 2500);
+
+// --- banderitas: punto + linea + texto, ancladas a una direccion (yaw/pitch)
+const flags = [];
+const cont = document.getElementById('flags');
+const lista = document.getElementById('lista');
+let pinning = false, sel = null;
+
+const btnPin = document.getElementById('pin');
+btnPin.addEventListener('click', () => {
+  pinning = !pinning;
+  btnPin.classList.toggle('on', pinning);
+  canvas.style.cursor = pinning ? 'crosshair' : 'grab';
+});
+
+function dirDeYawPitch(y, p) {
+  const ry = THREE.MathUtils.degToRad(y), rp = THREE.MathUtils.degToRad(p);
+  return new THREE.Vector3(-Math.sin(ry) * Math.cos(rp), Math.sin(rp), -Math.cos(ry) * Math.cos(rp));
+}
+
+function addFlag(cx, cy) {
+  // pixel -> direccion en el mundo (sin necesidad de intersectar nada)
+  const ndc = new THREE.Vector2((cx / innerWidth) * 2 - 1, -(cy / innerHeight) * 2 + 1);
+  const rc = new THREE.Raycaster(); rc.setFromCamera(ndc, camera);
+  const d = rc.ray.direction.clone().normalize();
+  const f = {
+    id: Date.now(),
+    yaw: THREE.MathUtils.radToDeg(Math.atan2(-d.x, -d.z)),
+    pitch: THREE.MathUtils.radToDeg(Math.asin(THREE.MathUtils.clamp(d.y, -1, 1))),
+    texto: 'Punto ' + (flags.length + 1),
+    el: null,
+  };
+  const el = document.createElement('div');
+  el.className = 'flag';
+  el.innerHTML = '<div class="txt"></div><div class="line"></div><div class="dot"></div>';
+  el.querySelector('.txt').textContent = f.texto;
+  cont.appendChild(el); f.el = el;
+  flags.push(f); pintarLista();
+}
+
+function pintarLista() {
+  lista.innerHTML = '';
+  flags.forEach((f, i) => {
+    const row = document.createElement('div'); row.className = 'it';
+    const inp = document.createElement('input'); inp.value = f.texto;
+    inp.addEventListener('input', () => { f.texto = inp.value; f.el.querySelector('.txt').textContent = inp.value; });
+    inp.addEventListener('focus', () => { sel = f.id; });
+    const del = document.createElement('button'); del.textContent = '×';
+    del.addEventListener('click', () => { f.el.remove(); flags.splice(i, 1); pintarLista(); });
+    const ir = document.createElement('button'); ir.textContent = '→';
+    ir.title = 'ir a este punto';
+    ir.addEventListener('click', () => { yaw = f.yaw; pitch = f.pitch; vYaw = vPitch = 0; });
+    row.append(inp, ir, del); lista.appendChild(row);
+  });
+  if (!flags.length) lista.innerHTML = '<span style="color:var(--dim)">sin banderitas — activa "pinchar" y toca el lugar</span>';
+}
+pintarLista();
+
+canvas.addEventListener('click', e => { if (pinning) addFlag(e.clientX, e.clientY); });
+
+// mientras te mueves se esconden; al frenar vuelven
+let quieto = 0;
+function actualizarFlags(dt) {
+  const moviendo = drag || Math.abs(vYaw) > 0.02 || Math.abs(vPitch) > 0.02 || P.spin > 0;
+  quieto = moviendo ? 0 : quieto + dt;
+  cont.classList.toggle('moving', moviendo || quieto < 0.18);
+
+  const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+  for (const f of flags) {
+    const d = dirDeYawPitch(f.yaw, f.pitch);
+    if (d.dot(fwd) <= 0.05) { f.el.style.display = 'none'; continue; }   // detras de la camara
+    const v = d.clone().project(camera);
+    f.el.style.display = '';
+    f.el.style.left = ((v.x * 0.5 + 0.5) * innerWidth) + 'px';
+    f.el.style.top = ((-v.y * 0.5 + 0.5) * innerHeight) + 'px';
+    f.el.classList.toggle('sel', f.id === sel);
+  }
+}
+
+const hud = document.getElementById('hud');
+let last = performance.now(), fps = 0;
+renderer.setAnimationLoop(now => {
+  const dt = Math.min((now - last) / 1000, 0.1); last = now;
+  fps = fps * 0.9 + (1 / dt) * 0.1;
+
+  if (!drag) { yaw += vYaw; pitch += vPitch; vYaw *= P.damp; vPitch *= P.damp; }
+  yaw += P.spin * dt;
+
+  if (rec.on) {
+    pitch = THREE.MathUtils.clamp(pitch, -89, 89);
+    fov = THREE.MathUtils.clamp(fov, 10, 120);
+    rec.yawMin = Math.min(rec.yawMin, yaw);   rec.yawMax = Math.max(rec.yawMax, yaw);
+    rec.pitchMin = Math.min(rec.pitchMin, pitch); rec.pitchMax = Math.max(rec.pitchMax, pitch);
+    rec.fovMin = Math.min(rec.fovMin, fov);   rec.fovMax = Math.max(rec.fovMax, fov);
+    document.getElementById('dottxt').textContent =
+      `grabando ${((now - rec.t0)/1000).toFixed(0)}s · yaw ${(rec.yawMax-rec.yawMin).toFixed(0)}°` +
+      ` · pitch ${rec.pitchMin.toFixed(0)}/${rec.pitchMax.toFixed(0)} · fov ${rec.fovMin.toFixed(0)}/${rec.fovMax.toFixed(0)}`;
+  } else {
+    fov = THREE.MathUtils.clamp(fov, P.fovMin, P.fovMax);
+    if (real.on) {
+      const halfV = fov / 2;
+      const halfH = THREE.MathUtils.radToDeg(
+        Math.atan(Math.tan(THREE.MathUtils.degToRad(halfV)) * camera.aspect));
+      const mY = Math.max(0, real.semiYaw - halfH);
+      yaw = THREE.MathUtils.clamp(yaw, real.yawC - mY, real.yawC + mY);
+      const abajo = real.pitchC - real.semiPitch + halfV;                       // nunca vacio bajo la foto
+      const arriba = real.sky ? real.pitchC + real.semiPitch + real.skyUp       // el cielo cubre lo de arriba
+                             : real.pitchC + real.semiPitch - halfV;
+      pitch = arriba >= abajo ? THREE.MathUtils.clamp(pitch, abajo, arriba) : real.pitchC;
+    } else {
+      if (P.yawLimit) yaw = THREE.MathUtils.clamp(yaw, P.yaw0 - P.yawRange, P.yaw0 + P.yawRange);
+      pitch = THREE.MathUtils.clamp(pitch, P.pitchMin, P.pitchMax);
+    }
+  }
+
+  if (gyroOn && gyroQ && !drag) {
+    pitch = THREE.MathUtils.clamp(gyroQ.b - 90, P.pitchMin, P.pitchMax);
+    yaw = -gyroQ.a;
+  }
+
+  camera.fov = fov; camera.updateProjectionMatrix();
+  camera.quaternion.setFromEuler(new THREE.Euler(
+    THREE.MathUtils.degToRad(pitch), THREE.MathUtils.degToRad(yaw), 0, 'YXZ'));
+  renderer.render(scene, camera);
+  actualizarFlags(dt);
+
+  hud.innerHTML = `yaw   <b>${(((yaw % 360) + 540) % 360 - 180).toFixed(1)}°</b>\n`
+                + `pitch <b>${pitch.toFixed(1)}°</b>\n`
+                + `fov   <b>${fov.toFixed(1)}°</b>\n`
+                + `fps   <b>${fps.toFixed(0)}</b>  ${gyroOn ? 'gyro' : 'drag'}`
+                + (patchMesh.visible ? '\nparche <b>ON</b>' : '')
+                + (real.on ? `\ndetalle <b>${detalle().toFixed(2)}x</b>${detalle() < 0.97 ? ' (interpolando)' : ''}` : '')
+                + `\nviendo <b>${viendo()}</b>`;
+});
+</script>
+</body>
+</html>

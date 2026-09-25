@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pieza en 3D — Monte Verde</title>
+<meta name="theme-color" content="#16110C">
+<link rel="icon" href="assets/marca/icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/marca/icono.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hito Monte Verde">
+<meta property="og:locale" content="es_CL">
+<meta property="og:title" content="Piezas en 3D — Monte Verde">
+<meta property="og:description" content="Gira los modelos del recorrido, acércalos y míralos con luz rasante.">
+<meta property="og:image" content="assets/marca/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Gira los modelos del recorrido, acércalos y míralos con luz rasante.">
+<link rel="stylesheet" href="assets/css/app.css?v=41">
+<link rel="stylesheet" href="assets/css/visor.css?v=41">
+<script type="importmap">
+{"imports":{"three":"./assets/vendor/three/three.module.js",
+            "three/addons/":"./assets/vendor/three/addons/"}}
+</script>
+</head>
+<body class="lienzo">
+
+<canvas class="escena" id="pieza"></canvas>
+<canvas class="escena" id="molde" style="display:none"></canvas>
+
+<header class="topbar">
+  <a class="mark" href="index.html">Monte <em>Verde</em></a>
+  <span class="spacer"></span>
+  <span class="chip sage" id="chipPieza">—</span>
+</header>
+
+<div id="consigna">
+  <h1 id="titulo">—</h1>
+  <p id="bajada">Arrastra el dedo para girar la pieza.</p>
+  <div id="capas">
+    <button class="chip" data-modo="relieve" aria-pressed="true">Relieve</button>
+    <button class="chip" data-modo="textura" aria-pressed="false">Textura real</button>
+    <button class="chip" data-modo="puntos" aria-pressed="false">Nube de puntos</button>
+    <span class="sep"></span>
+    <button class="chip" id="capaContorno" aria-pressed="false">Contorno</button>
+    <button class="chip" id="capaSensor" aria-pressed="false">Luz con el teléfono</button>
+  </div>
+</div>
+
+<div id="dial"><div class="rayo" id="rayo"></div><div class="centro"></div><span>LUZ</span></div>
+
+<div id="zoom">
+  <button class="btn" id="mas" aria-label="Acercar">+</button>
+  <button class="btn" id="menos" aria-label="Alejar">−</button>
+  <button class="btn" id="encuadre" aria-label="Encuadre inicial">◻</button>
+  <button class="btn" id="foto" aria-label="Guardar una foto de la pieza" title="Guardar foto">
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9"
+         stroke-linejoin="round"><path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg>
+  </button>
+</div>
+
+<div id="hoja">
+  <div id="tirador">
+    <span class="raya"></span>
+    <div class="fila">
+      <b id="tituloHoja">—</b>
+      <span class="pista" id="pistaHoja">ficha del catálogo</span>
+      <button class="btn primary" id="sacarMolde">Sacar el molde</button>
+    </div>
+  </div>
+  <div class="cita" id="cita"></div>
+  <dl class="datos" id="datos"></dl>
+  <div style="display:flex;gap:9px;margin-top:12px">
+    <a class="btn" style="flex:1" id="linkFicha" href="#">Ficha completa</a>
+    <a class="btn" style="flex:1" href="index.html">Volver</a>
+  </div>
+</div>
+
+<div id="cargando">Cargando la pieza…</div>
+
+<script type="module">
+// Visor 3D de una pieza: girarla, acercarla y mirarla con luz rasante.
+// Cada parte vive en assets/js/visor/; aquí sólo se conectan. Se importan todas desde
+// acá, con ?v=N, porque es lo que tools/version.py mantiene al día.
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { montarVolver, recordarPieza } from './assets/js/navegacion.js?v=41';
+import { registrar } from './assets/js/analitica.js?v=41';
+import { sacarFoto } from './assets/js/foto.js?v=41';
+import './assets/js/offline.js?v=41';
+import { activarSensor, esTactil } from './assets/js/sensor.js?v=41';
+import { prepararTextura, crearRelieve, mapaRugosidad } from './assets/js/visor/materiales.js?v=41';
+import { nubePorAltura } from './assets/js/nube.js?v=41';
+import { contornoSobre } from './assets/js/visor/contorno.js?v=41';
+import { montarVista } from './assets/js/visor/vista.js?v=41';
+import { montarLuz } from './assets/js/visor/luz.js?v=41';
+import { montarDetalle } from './assets/js/visor/detalle.js?v=41';
+import { llenarFicha, montarHoja } from './assets/js/visor/hoja.js?v=41';
+import { mostrarLista } from './assets/js/visor/elegir.js?v=41';
+
+const $ = id => document.getElementById(id);
+const V = 41;                                     // versión de los medios
+
+const CAT = await fetch('assets/data/catalogo.json', { cache: 'no-cache' }).then(r => r.json());
+const PARAMS = new URLSearchParams(location.search);
+const CODIGO = PARAMS.get('id');
+
+if (!CODIGO) {
+  mostrarLista(CAT);
+  // se detiene el resto del módulo sin ensuciar la consola con un error inventado
+  await new Promise(() => {});
+}
+
+const FICHA = CAT.piezas.find(p => p.codigo === CODIGO);
+if (!FICHA || !FICHA.media.modelo) {
+  $('cargando').textContent = 'Esa pieza no tiene modelo 3D.';
+  throw new Error('sin modelo');
+}
+// lo propio de cada pieza vive en el catálogo, no en el código
+const CONT = FICHA.contorno ? await fetch(`${FICHA.contorno}?v=${V}`).then(r => r.json()) : null;
+const CAM = FICHA.camara || {};
+const HAY_RELIEVE = FICHA.relieve === true;      // sólo donde el relieve es el dato, como la huella
+
+// ---------- escena
+const canvas = $('pieza');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+
+// Una pieza quieta no necesita 60 cuadros por segundo. Se dibuja sólo cuando algo
+// cambia: girar, acercar, mover la luz, cambiar de capa o llegar el modelo completo.
+// En reposo el bucle no hace nada y el teléfono deja de calentarse.
+let sucio = true;
+const pedir = () => { sucio = true; };
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+// sin curva de tono, los claros se queman y la piedra parece plástico
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x16110c);
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, .01, 20);
+
+// una sola luz dirigible: es la que revela el relieve
+const rasante = new THREE.DirectionalLight(0xfff4e2, 3.4);
+const relleno = new THREE.AmbientLight(0xffffff, .14);
+const cielo = new THREE.HemisphereLight(0x8c8c7a, 0x16110c, .2);
+scene.add(rasante, relleno, cielo);
+
+const draco = new DRACOLoader().setDecoderPath('assets/vendor/three/addons/libs/draco/');
+const cargador = new GLTFLoader().setDRACOLoader(draco);
+
+// primero el liviano: aparece casi al instante; el completo llega después (detalle.js)
+const gltf = await cargador.loadAsync(`${FICHA.media.modelo_movil}?v=${V}`);
+const pieza = gltf.scene;
+let malla = null;
+pieza.traverse(o => { if (o.isMesh && !malla) malla = o; });
+
+const caja = new THREE.Box3().setFromObject(pieza);
+const centro = caja.getCenter(new THREE.Vector3());
+const tam = caja.getSize(new THREE.Vector3());
+pieza.position.sub(centro);
+scene.add(pieza);
+
+// luz de entorno: da la difusa suave que una sola direccional no puede dar
+const pmrem = new THREE.PMREMGenerator(renderer);
+const entorno = pmrem.fromScene(new RoomEnvironment(), .04).texture;
+scene.environment = entorno;
+
+// ---------- lo que se puede ver de la pieza
+const matTextura = prepararTextura(malla.material);
+const matRelieve = crearRelieve();
+const puntos = nubePorAltura(malla, FICHA.nube);
+const contorno = CONT && contornoSobre({ scene, malla, caja, centro, tam, datos: CONT });
+
+montarDetalle({
+  lienzo: canvas, cargador, url: `${FICHA.media.modelo}?v=${V}`,
+  liviano: FICHA.media.modelo === FICHA.media.modelo_movil,
+  malla, matTextura, nube: puntos, mapaRugosidad, pedir,
+});
+
+const vista = montarVista({ canvas, camara: camera, pieza, tam, cam: CAM, pedir });
+const luz = montarLuz({ rasante, radio: vista.radio, pedir, hayRelieve: HAY_RELIEVE, activarSensor, esTactil });
+
+// ---------- modos de visualización
+function aplicarModo(modo) {
+  pedir();
+  const esRelieve = modo === 'relieve', esPuntos = modo === 'puntos';
+  malla.material = esRelieve ? matRelieve : matTextura;
+  malla.visible = !esPuntos;
+  if (puntos) puntos.visible = esPuntos;
+  // en relieve manda la rasante y el entorno estorba; con textura, al revés
+  relleno.intensity = esRelieve ? .14 : .12;
+  cielo.intensity = esRelieve ? .20 : .18;
+  rasante.intensity = esRelieve ? 3.4 : 1.15;
+  scene.environment = esRelieve ? null : entorno;
+  if (HAY_RELIEVE) $('dial').classList.toggle('on', esRelieve && !luz.sensorPrendido());
+  $('bajada').textContent = esRelieve
+    ? 'Gira la pieza con el dedo. La luz rasante revela el relieve.'
+    : (esPuntos ? 'Nube de puntos del escaneo, coloreada por altura.' : 'Textura del escaneo.');
+  for (const b of document.querySelectorAll('#capas [data-modo]'))
+    b.setAttribute('aria-pressed', String(b.dataset.modo === modo));
+}
+if (!puntos) document.querySelector('#capas [data-modo="puntos"]').style.display = 'none';
+if (!HAY_RELIEVE) document.querySelector('#capas [data-modo="relieve"]').style.display = 'none';
+document.querySelectorAll('#capas [data-modo]').forEach(b =>
+  b.addEventListener('click', () => aplicarModo(b.dataset.modo)));
+
+if (!contorno) $('capaContorno').style.display = 'none';
+else $('capaContorno').addEventListener('click', () => {
+  contorno.visible = !contorno.visible;
+  $('capaContorno').setAttribute('aria-pressed', String(contorno.visible));
+  pedir();
+});
+
+// ---------- el molde, en su propia escena: sólo se baja si lo piden
+let molde = null, enMolde = false;
+if (!FICHA.molde) $('sacarMolde').style.display = 'none';
+$('sacarMolde').addEventListener('click', async () => {
+  enMolde = !enMolde;
+  $('sacarMolde').textContent = enMolde ? 'Volver a la huella' : 'Sacar el molde';
+  $('titulo').textContent = enMolde ? 'El molde' : FICHA.denominacion;
+  $('capas').style.display = enMolde ? 'none' : 'flex';
+  $('dial').style.visibility = enMolde ? 'hidden' : 'visible';
+  canvas.style.display = enMolde ? 'none' : 'block';
+  if (enMolde) $('bajada').textContent = 'Arrastra para darlo vuelta.';
+  else aplicarModo(document.querySelector('#capas [aria-pressed="true"][data-modo]')?.dataset.modo
+                   || (HAY_RELIEVE ? 'relieve' : 'textura'));
+  if (enMolde && !molde) {
+    $('sacarMolde').textContent = 'Armando…';
+    const { armarMolde } = await import('./assets/js/visor/molde.js?v=41');
+    molde = await armarMolde($('molde'), { url: `${FICHA.molde}?v=${V}`, draco });
+    $('sacarMolde').textContent = 'Volver a la huella';
+  }
+  $('molde').style.display = molde && enMolde ? 'block' : 'none';
+  molde?.correr(enMolde);             // el molde sólo dibuja mientras se lo mira
+  if (!enMolde) pedir();              // volver a la huella pide un cuadro de la escena principal
+});
+
+// ---------- foto de lo que se está viendo, pieza o molde
+$('foto').addEventListener('click', async () => {
+  let cuadro;
+  if (enMolde && molde) cuadro = molde.dibujar();
+  else { renderer.render(scene, camera); cuadro = canvas; }   // recién dibujada: si no, sale negra
+  const como = await sacarFoto(cuadro, FICHA, enMolde ? 'el molde' : '');
+  if (como) registrar('foto', { pieza: FICHA.codigo, detalle: enMolde ? `${como}-molde` : como });
+});
+
+// ---------- ficha, tal cual está en el catálogo
+recordarPieza(FICHA.codigo);
+montarVolver(`pieza.html?id=${encodeURIComponent(FICHA.codigo)}`, 'Ficha');
+llenarFicha(FICHA);
+montarHoja();
+
+// Chrome descarta contextos WebGL cuando hay varias pestañas con 3D: avisar y recuperar
+canvas.addEventListener('webglcontextlost', e => {
+  e.preventDefault();
+  $('bajada').textContent = 'La tarjeta gráfica liberó la escena. Toca para recuperarla.';
+  document.body.addEventListener('pointerdown', () => location.reload(), { once: true });
+});
+
+// ---------- encuadre de cada pieza, sólo con ?debug=1: no se baja para el visitante
+if (PARAMS.has('debug')) {
+  const { montarCalibracion } = await import('./assets/js/visor/calibracion.js?v=41');
+  montarCalibracion({ ficha: FICHA, cam: CAM, vista });
+}
+
+const medir = () => { renderer.setSize(innerWidth, innerHeight);
+                      camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+                      pedir(); };
+addEventListener('resize', medir); medir();
+vista.ubicar(); vista.aplicarZoom(); luz.ubicar(); aplicarModo(HAY_RELIEVE ? 'relieve' : 'textura');
+renderer.setAnimationLoop(() => {
+  if (!sucio) return;
+  sucio = false;
+  renderer.render(scene, camera);
+});
+$('cargando').style.opacity = 0;
+setTimeout(() => $('cargando').remove(), 450);
+</script>
+</body>
+</html>

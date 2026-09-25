@@ -1,0 +1,9 @@
+# Los buscadores sólo leen robots.txt en la raíz del dominio: este archivo tiene que
+# quedar en https://tecmedhub.org/robots.txt, no dentro de /hitomonteverde/.
+# Si el dominio ya tiene uno, agregarle estas líneas en vez de reemplazarlo.
+
+User-agent: *
+# Los PDF de carteles pesan 26 MB y son para imprimir, no para buscar.
+Disallow: /hitomonteverde/assets/impresos/
+
+Sitemap: https://tecmedhub.org/hitomonteverde/sitemap.xml

@@ -1,0 +1,148 @@
+{
+  "LCDCP-MV-00004": {
+    "archivo": "assets/images/recortes/LCDCP-MV-00004.webp",
+    "px": [
+      2000,
+      313
+    ],
+    "mm_por_px": 0.0205,
+    "tamano_real_mm": [
+      41.0,
+      6.4
+    ]
+  },
+  "LCDCP-MV-00005": {
+    "archivo": "assets/images/recortes/LCDCP-MV-00005.webp",
+    "px": [
+      2000,
+      136
+    ],
+    "mm_por_px": 0.1,
+    "tamano_real_mm": [
+      200.0,
+      13.6
+    ]
+  },
+  "LCDCP-MV-00008": {
+    "archivo": "assets/images/recortes/LCDCP-MV-00008.webp",
+    "px": [
+      1339,
+      1063
+    ],
+    "mm_por_px": 0.01718,
+    "tamano_real_mm": [
+      23.0,
+      18.3
+    ]
+  },
+  "LCDCP-MV-00011": {
+    "archivo": "assets/images/recortes/LCDCP-MV-00011.webp",
+    "px": [
+      1630,
+      693
+    ],
+    "mm_por_px": 0.09018,
+    "tamano_real_mm": [
+      147.0,
+      62.5
+    ]
+  },
+  "LCDCP-MV-00152": {
+    "archivo": "assets/images/recortes/LCDCP-MV-00152.webp",
+    "px": [
+      1607,
+      526
+    ],
+    "mm_por_px": 0.05414,
+    "tamano_real_mm": [
+      87.0,
+      28.5
+    ]
+  },
+  "LCDCP-MV-00171": {
+    "archivo": "assets/images/recortes/LCDCP-MV-00171.webp",
+    "px": [
+      1260,
+      152
+    ],
+    "mm_por_px": 0.06587,
+    "tamano_real_mm": [
+      83.0,
+      10.0
+    ]
+  },
+  "LCDCP-MV-00200": {
+    "archivo": "assets/images/recortes/LCDCP-MV-00200.webp",
+    "px": [
+      1621,
+      976
+    ],
+    "mm_por_px": 0.05799,
+    "tamano_real_mm": [
+      94.0,
+      56.6
+    ]
+  },
+  "LCDCP-MV-01377": {
+    "archivo": "assets/images/recortes/LCDCP-MV-01377.webp",
+    "px": [
+      2000,
+      1071
+    ],
+    "mm_por_px": 0.1045,
+    "tamano_real_mm": [
+      209.0,
+      111.9
+    ]
+  },
+  "LCDCP-MV-01892": {
+    "archivo": "assets/images/recortes/LCDCP-MV-01892.webp",
+    "px": [
+      1866,
+      1285
+    ],
+    "mm_por_px": 0.12862,
+    "tamano_real_mm": [
+      240.0,
+      165.3
+    ]
+  },
+  "LCDCP-MV-01898": {
+    "archivo": "assets/images/recortes/LCDCP-MV-01898.webp",
+    "px": [
+      2000,
+      649
+    ],
+    "mm_por_px": 0.115,
+    "tamano_real_mm": [
+      230.0,
+      74.6
+    ]
+  },
+  "LCDCP-MV-01934": {
+    "archivo": "assets/images/recortes/LCDCP-MV-01934.webp",
+    "px": [
+      2000,
+      932
+    ],
+    "mm_por_px": 0.159,
+    "tamano_real_mm": [
+      318.0,
+      148.2
+    ]
+  },
+  "LCDCP-MV-02112": {
+    "archivo": "assets/images/recortes/LCDCP-MV-02112.webp",
+    "px": [
+      2000,
+      499
+    ]
+  },
+  "LCDCP-MV-01894": {
+    "archivo": "assets/images/recortes/LCDCP-MV-01894.webp",
+    "px": [
+      2000,
+      1012
+    ]
+  }
+}

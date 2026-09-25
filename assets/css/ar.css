@@ -1,0 +1,96 @@
+/* Realidad aumentada (ar.html): la cámara a pantalla completa y lo que flota encima. */
+
+body { margin: 0; overflow: hidden; background: #000; }
+#video, #tres { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#video { z-index: 0; }
+#tres { z-index: 1; pointer-events: none; touch-action: none; }
+.topbar { position: fixed; left: 0; right: 0; top: 0; z-index: 7; }
+#hud { position: fixed; top: calc(var(--bar-h) + 8px); left: 10px; z-index: 5; background: rgba(13,15,18,.8);
+       border: 1px solid var(--line); border-radius: 8px; padding: 8px 11px;
+       font: 12px/1.5 ui-monospace, monospace; color: var(--sand-300); white-space: pre; }
+#hud b { color: var(--ochre-light); }
+/* sin ?debug=1 el HUD es sólo la indicación para el visitante, no una consola */
+#hud.guia { left: 12px; right: 12px; text-align: center; white-space: normal;
+            font: 500 14px/1.4 var(--sans); color: var(--cream);
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+            border-color: var(--glass-border); border-radius: var(--radius-lg); padding: 10px 14px; }
+#panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: flex; gap: 8px;
+         padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+         background: rgba(22,17,12,.9); border-top: 1px solid var(--line); }
+#panel .btn { flex: 1; padding: 11px; }
+/* panel de ajuste: sólo con ?debug=1, para anotar cómo se apoya cada pieza */
+#ajusteAr { position: fixed; left: 10px; top: calc(var(--bar-h) + 58px); z-index: 18; width: 226px;
+            max-height: calc(100vh - var(--bar-h) - 150px); overflow: auto; padding: 11px;
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--line); border-radius: var(--radius); font-size: 11.5px; }
+#ajusteAr b { display: block; color: var(--cream); margin-bottom: 6px; font-size: 11.5px; }
+#ajusteAr label { display: flex; justify-content: space-between; color: var(--sand-500);
+                  font-size: 10.5px; margin: 7px 0 2px; }
+#ajusteAr select { width: 100%; margin-bottom: 8px; background: var(--soil-mid);
+                   color: var(--cream); border: 1px solid var(--line); border-radius: 8px;
+                   padding: 6px 8px; font: 600 11.5px var(--sans); }
+#ajusteAr input[type=range] { width: 100%; accent-color: var(--ochre); }
+#ajusteAr .fila { display: flex; gap: 6px; margin-top: 9px; }
+#ajusteAr .fila .btn { flex: 1; padding: 7px; font-size: 11px; }
+#ajusteAr pre { margin: 8px 0 0; font-size: 10px; color: var(--sand-500);
+                white-space: pre-wrap; word-break: break-all; }
+
+/* zoom y giro de la pieza sobre el marcador: la misma columna que usa el visor */
+#tocar { position: fixed; right: 12px; top: calc(var(--bar-h) + 12px); z-index: 15;
+         display: none; flex-direction: column; gap: 6px; }
+#tocar.on { display: flex; }
+#tocar .btn { width: 44px; height: 44px; padding: 0; font-size: 17px; line-height: 1;
+              background: var(--glass-bg); backdrop-filter: var(--glass-blur); }
+#tocar .sep { height: 7px; }
+/* En un teléfono bajo, diez botones en fila no caben sobre la tarjeta de abajo: la
+   columna se corta a tiempo y lo que sobra pasa a una segunda columna a la izquierda. */
+#tocar { max-height: calc(100vh - var(--bar-h) - 240px); max-height: calc(100dvh - var(--bar-h) - 240px);
+         flex-wrap: wrap-reverse; align-content: flex-end; }
+
+/* aviso cuando la cámara ve un QR del propio sitio: el visitante decide si salta */
+#salto { position: fixed; left: 12px; right: 12px; bottom: 74px; z-index: 8;
+         display: none; align-items: center; gap: 12px; padding: 11px 14px;
+         background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+         border: 1px solid var(--ochre); border-radius: var(--radius-lg); }
+#salto.on { display: flex; }
+#salto .quien { flex: 1; min-width: 0; }
+#salto b { display: block; font-family: var(--serif); font-weight: 600; font-size: 15px;
+           color: var(--cream); }
+#salto span { font-size: 12px; color: var(--sand-500); }
+
+/* tarjeta de la pieza reconocida: aparece sola cuando el marcador se identifica */
+#reconocida { position: fixed; left: 12px; right: 12px; bottom: 74px; z-index: 7;
+              display: flex; align-items: center; gap: 12px; padding: 11px 14px;
+              background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+              border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
+              opacity: 0; transform: translateY(12px); pointer-events: none;
+              transition: opacity .25s ease, transform .25s ease; }
+#reconocida.on { opacity: 1; transform: none; pointer-events: auto; }
+#reconocida .quien { flex: 1; min-width: 0; }
+#reconocida b { display: block; font-family: var(--serif); font-weight: 600; font-size: 15px;
+                color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#reconocida span { font-size: 12px; color: var(--sand-500); }
+/* al revisar, el video se atenúa para que la pieza tenga todo el peso visual */
+#video { transition: filter .3s ease; }
+body.revisando #video { filter: brightness(.45) saturate(.6); }
+#reconocida .btn { flex: none; padding: 9px 14px; }
+/* cuánto falta para que se congele sola: se llena mientras la pieza está quieta */
+#reconocida .asentar { position: absolute; left: 14px; right: 14px; bottom: 0; height: 3px;
+                       border-radius: 3px; background: var(--ochre); transform-origin: left;
+                       transform: scaleX(var(--p, 0)); opacity: .9; }
+#reconocida { overflow: hidden; }
+/* En el teléfono no caben nombre, texto y tres botones en una fila: el nombre arriba a
+   todo lo ancho y los botones repartidos abajo. */
+@media (max-width: 560px) {
+  #reconocida { flex-wrap: wrap; gap: 10px; padding: 12px 12px 14px; }
+  #reconocida .quien { flex: 1 1 100%; }
+  #reconocida .btn { flex: 1 1 0; padding: 10px 8px; }
+}
+
+/* mensaje sólo cuando algo falla: si la cámara abre, no se muestra nada */
+#falla { position: fixed; inset: 0; z-index: 20; display: none; place-items: center; padding: 24px;
+         background: var(--soil); color: var(--sand-300); text-align: center; font-size: 14.5px; }
+#falla.on { display: grid; }
+#falla .card { max-width: 420px; }
+#falla h2 { margin-bottom: 10px; }
+#falla code { color: var(--ochre-light); font-size: 12px; }

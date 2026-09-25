@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Libro de visitas — Monte Verde</title>
+<meta name="theme-color" content="#16110C">
+<link rel="icon" href="assets/marca/icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/marca/icono.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hito Monte Verde">
+<meta property="og:locale" content="es_CL">
+<meta property="og:title" content="Libro de visitas — Monte Verde">
+<meta property="og:description" content="Lo que dejan escrito quienes recorren la ruta de Monte Verde.">
+<meta property="og:image" content="assets/marca/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Lo que dejan escrito quienes recorren la ruta de Monte Verde.">
+<link rel="stylesheet" href="assets/css/app.css?v=41">
+<style>
+  .firma { display: grid; gap: 14px; margin-top: 20px; }
+  .firma label { display: grid; gap: 6px; font-size: 13.5px; color: var(--sand-300); }
+  .firma .opc { color: var(--sand-500); font-size: 12px; }
+  .firma input, .firma textarea {
+    font: 400 16px/1.45 var(--sans); color: var(--cream); background: var(--soil);
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 11px 13px; width: 100%;
+    box-sizing: border-box; resize: vertical; }
+  .firma input:focus, .firma textarea:focus { outline: none; border-color: var(--ochre); }
+  .firma .cuenta { justify-self: end; font-size: 11.5px; color: var(--sand-500); }
+  /* el campo para robots: fuera de la vista y del teclado, pero en el formulario */
+  .firma .trampa { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .firma .btn { justify-self: start; }
+  .aviso { margin: 0; font-size: 14px; min-height: 1.4em; }
+  .aviso.mal { color: #E8899B; }
+  .gracias { text-align: center; padding: 26px 18px; }
+  .gracias h2 { margin-bottom: 8px; }
+
+  .mensajes { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .mensaje { margin: 0; }
+  .mensaje blockquote { margin: 0; font: italic 400 16.5px/1.55 var(--serif); color: var(--cream);
+                        white-space: pre-line; overflow-wrap: anywhere; }
+  .mensaje figcaption { margin-top: 10px; font-size: 12.5px; color: var(--sand-500); }
+  .mensaje figcaption b { color: var(--sand-300); font-weight: 600; }
+
+  /* créditos de la experiencia digital: sólo de eso, no de la colección. Discretos: una
+     línea al pie de la página, no una tarjeta que compita con los mensajes */
+  .creditos { margin-top: 38px; padding-top: 16px; border-top: 1px solid var(--line);
+              font-size: 12.5px; color: var(--sand-500); }
+  .creditos .quien { margin: 0; font-size: 13px; color: var(--sand-300); }
+  .creditos .quien b { color: var(--cream); font-weight: 600; }
+  .creditos .alcance { margin: 4px 0 12px; }
+  .equipo { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; }
+  .equipo li { display: flex; align-items: center; gap: 8px; }
+  .equipo img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex: none;
+                box-shadow: 0 0 0 1px var(--line); }
+  .equipo b { display: block; color: var(--sand-300); font-weight: 500; font-size: 12.5px; line-height: 1.25; }
+  .equipo a { font: 11px ui-monospace, SFMono-Regular, monospace; color: var(--sand-500); text-decoration: none; }
+  .equipo a:hover { color: var(--ochre-light); text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="mark" href="index.html">Monte <em>Verde</em></a>
+  <span class="spacer"></span>
+  <span class="chip">Libro de visitas</span>
+</header>
+
+<main class="wrap">
+  <section class="hero" style="padding-bottom:6px">
+    <h1>Libro de visitas</h1>
+    <p class="lead">
+      Deja lo que te llevas de Monte Verde y de dónde vienes. Los mensajes
+      aparecen aquí después de una revisión.
+    </p>
+  </section>
+
+  <form class="card firma" id="firma" novalidate>
+    <label><span>De dónde vienes <span class="opc">(opcional)</span></span>
+      <input name="lugar" maxlength="60" autocomplete="address-level2" placeholder="Puerto Montt, Chile">
+    </label>
+    <label>Tu mensaje
+      <textarea name="mensaje" maxlength="600" rows="4" required></textarea>
+      <span class="cuenta" id="cuenta">0 / 600</span>
+    </label>
+    <label class="trampa" aria-hidden="true">No completar
+      <input name="web" tabindex="-1" autocomplete="off">
+    </label>
+    <button class="btn primary" type="submit" id="firmar">Firmar el libro</button>
+    <p class="aviso" id="aviso" role="status"></p>
+  </form>
+
+  <div class="section-title"><h2>Lo que han escrito</h2></div>
+  <div class="mensajes" id="mensajes"><p class="muted">Cargando…</p></div>
+
+  <div style="margin-top:22px"><a class="btn" href="index.html">Volver a las piezas</a></div>
+
+  <!-- Autores sólo de la experiencia digital. La colección, su estudio y el catálogo son
+       del proyecto que firma al pie: no poner aquí nada que se lo atribuya al equipo. -->
+  <section class="creditos" aria-label="Créditos de la experiencia digital">
+    <p class="quien">Experiencia digital · <b>TecMedHub</b>, Universidad Austral de Chile, Sede Puerto Montt</p>
+    <p class="alcance">Este sitio, el visor 3D y la realidad aumentada. La colección y su catálogo pertenecen
+      al proyecto Monte Verde que firma al pie.</p>
+    <ul class="equipo">
+      <!-- las fotos son las de sus perfiles de GitHub, guardadas aquí: la página no le
+           pide nada a GitHub y se ven sin red -->
+      <li><img src="assets/marca/equipo/debaq.webp?v=41" alt="" width="30" height="30" loading="lazy">
+        <span><b>Nicolás Baier-Quezada</b>
+          <a href="https://github.com/Debaq" target="_blank" rel="noopener">@Debaq</a></span></li>
+      <li><img src="assets/marca/equipo/vanne11.webp?v=41" alt="" width="30" height="30" loading="lazy">
+        <span><b>Vanessa Uribe-Hernández</b>
+          <a href="https://github.com/vanne11" target="_blank" rel="noopener">@vanne11</a></span></li>
+      <li><img src="assets/marca/equipo/fernandandreatm.webp?v=41" alt="" width="30" height="30" loading="lazy">
+        <span><b>Fernanda López-Moncada</b>
+          <a href="https://github.com/FernandandreaTM" target="_blank" rel="noopener">@FernandandreaTM</a></span></li>
+      <li><img src="assets/marca/equipo/pukem.webp?v=41" alt="" width="30" height="30" loading="lazy">
+        <span><b>Benjamín Catipillán-Ulloa</b>
+          <a href="https://github.com/Pukem" target="_blank" rel="noopener">@Pukem</a></span></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="foot wrap">
+  Restitución e Instalación del Patrimonio Arqueológico Monte Verde<br>
+  GORE Los Lagos · SERPAT · UACh Puerto Montt
+</footer>
+
+<script type="module">
+import { montarVolver, origen } from './assets/js/navegacion.js?v=41';
+import './assets/js/analitica.js?v=41';
+import './assets/js/offline.js?v=41';
+
+const $ = id => document.getElementById(id);
+const LIBRO = 'analitica/libro.php';
+const abierta = performance.now();     // el servidor descarta lo que llega demasiado rápido: robots
+
+{ const d = origen(); montarVolver(d ? d.url : 'index.html', d ? 'Volver a la pieza' : 'Inicio'); }
+
+// ---------- firmar
+const form = $('firma');
+const aviso = (txt, mal = false) => { $('aviso').textContent = txt; $('aviso').classList.toggle('mal', mal); };
+form.mensaje.addEventListener('input', () => { $('cuenta').textContent = `${form.mensaje.value.length} / 600`; });
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const datos = {
+    lugar: form.lugar.value.trim(),
+    mensaje: form.mensaje.value.trim(), web: form.web.value,
+    ms: Math.round(performance.now() - abierta),
+  };
+  if (datos.mensaje.length < 3) { aviso('Escribe un mensaje.', true); form.mensaje.focus(); return; }
+
+  $('firmar').disabled = true;
+  aviso('Enviando…');
+  try {
+    const r = await fetch(LIBRO, { method: 'POST', body: JSON.stringify(datos),
+                                   headers: { 'Content-Type': 'application/json' } });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) throw Object.assign(new Error(j.error || 'No se pudo enviar.'), { delServidor: true });
+    form.outerHTML = `<div class="card gracias">
+      <h2>¡Gracias por firmar!</h2>
+      <p class="muted">Tu mensaje aparecerá aquí apenas lo revisemos.</p></div>`;
+  } catch (err) {
+    // el texto queda en el formulario: con señal, basta volver a tocar el botón
+    aviso(err.delServidor ? err.message
+                          : 'No se pudo enviar: parece que no hay señal. Tu mensaje sigue aquí, prueba de nuevo.', true);
+    $('firmar').disabled = false;
+  }
+});
+
+// ---------- lo publicado
+const mes = new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric' });
+const cuando = f => { const d = new Date(`${f}T12:00:00`); return isNaN(d) ? '' : mes.format(d); };
+
+try {
+  const r = await fetch(LIBRO, { cache: 'no-cache' });
+  if (!r.ok) throw new Error();
+  const lista = await r.json();
+  const caja = $('mensajes');
+  caja.textContent = '';
+  if (!lista.length) caja.innerHTML = '<p class="muted">Todavía nadie firma. Puedes ser la primera persona.</p>';
+  for (const m of lista) {
+    // todo como texto: lo escribió cualquiera y no puede colarse nada en la página
+    const fig = document.createElement('figure');
+    fig.className = 'card mensaje';
+    const cita = document.createElement('blockquote');
+    cita.textContent = m.mensaje;
+    const pie = document.createElement('figcaption');
+    // sin nombres: no se recolectan datos personales. De dónde viene y cuándo.
+    const lugar = document.createElement('b');
+    lugar.textContent = m.lugar || 'Visitante';
+    pie.append(lugar, ` · ${cuando(m.fecha)}`);
+    fig.append(cita, pie);
+    caja.append(fig);
+  }
+} catch {
+  $('mensajes').innerHTML = '<p class="muted">Los mensajes se ven con conexión.</p>';
+}
+</script>
+</body>
+</html>

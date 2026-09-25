@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banco de trabajo — Monte Verde</title>
+<link rel="stylesheet" href="../assets/css/app.css?v=41">
+<script type="importmap">
+{"imports":{"three":"../assets/vendor/three/three.module.js",
+            "three/addons/":"../assets/vendor/three/addons/"}}
+</script>
+<style>
+  body { overflow: hidden; }
+  #escena { position: fixed; inset: 0; touch-action: none; display: block; cursor: grab; z-index: 0; }
+  #escena.marcando { cursor: crosshair; }
+  .topbar { position: fixed; left: 0; right: 0; top: 0; z-index: 12; }
+  .topbar select { background: var(--soil-mid); color: var(--cream); border: 1px solid var(--line);
+                   border-radius: 9px; padding: 7px 10px; font: 600 12.5px var(--sans); max-width: 46vw; }
+
+  #panel { position: fixed; top: calc(var(--bar-h) + 10px); right: 10px; width: 300px; z-index: 14;
+           max-height: calc(100vh - var(--bar-h) - 90px); overflow: auto; padding: 13px;
+           background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+           border: 1px solid var(--line); border-radius: var(--radius-lg); }
+  #panel h3 { font-size: 13px; margin: 0 0 8px; }
+  #panel .btn { width: 100%; margin-top: 7px; padding: 9px; font-size: 12.5px; }
+  #panel .fila { display: flex; gap: 6px; }
+  #panel .fila .btn { flex: 1; }
+  #panel hr { border: 0; border-top: 1px solid var(--line); margin: 12px 0; }
+  .btn.on { background: #13303d; border-color: var(--ochre); color: var(--ochre-light); }
+
+  .rosa { width: 92px; height: 92px; margin: 4px auto 8px; border-radius: 50%;
+          border: 1px solid var(--line); position: relative; background: var(--soil-soft); cursor: pointer; }
+  .rosa .rayo { position: absolute; left: 50%; top: 50%; width: 40px; height: 2px;
+                background: linear-gradient(90deg, var(--ochre), transparent); transform-origin: 0 50%; }
+  .rosa .centro { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+                  border-radius: 50%; background: var(--ochre); }
+
+  #lista .it { display: flex; gap: 5px; align-items: center; margin-bottom: 5px; }
+  #lista .n { width: 19px; height: 19px; border-radius: 50%; flex: none; display: grid;
+              place-items: center; font: 700 10px var(--sans); color: #241601; }
+  #lista input { flex: 1; min-width: 0; background: #0b0d10; border: 1px solid var(--line);
+                 color: var(--cream); border-radius: 6px; padding: 5px 7px; font: inherit; font-size: 11.5px; }
+  #lista button { width: auto; margin: 0; padding: 4px 7px; font-size: 11px; }
+
+  .dato { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0;
+          border-bottom: 1px solid var(--line); }
+  .dato span { color: var(--sand-500); } .dato b { color: var(--cream); font-weight: 600; }
+  #json { width: 100%; height: 110px; margin-top: 8px; background: #0b0d10; color: var(--sand-300);
+          border: 1px solid var(--line); border-radius: 8px; padding: 8px;
+          font: 10.5px/1.4 ui-monospace, monospace; resize: vertical; }
+
+  #etiquetas { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  .etq { position: absolute; transform: translate(-50%, -100%); display: flex; align-items: center;
+         gap: 6px; background: rgba(22,17,12,.86); border: 1px solid var(--glass-border);
+         backdrop-filter: blur(8px); color: var(--cream); border-radius: var(--radius-pill);
+         padding: 3px 9px 3px 4px; font-size: 11.5px; white-space: nowrap; }
+  .etq i { width: 17px; height: 17px; border-radius: 50%; color: #241601; font-style: normal;
+           display: grid; place-items: center; font: 700 10px var(--sans); }
+  /* en teléfono el panel se convierte en cajón: la pieza necesita la pantalla */
+  @media (max-width: 620px) {
+    #panel { left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 56vh;
+             border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+             padding-bottom: calc(13px + env(safe-area-inset-bottom));
+             transition: transform .28s ease; }
+    #panel.plegado { transform: translateY(100%); }
+  }
+  @media (min-width: 621px) { #verPanel { display: none; } }
+  #cargando { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
+              background: var(--soil); color: var(--sand-500); font-size: 13.5px; }
+</style>
+</head>
+<body>
+
+<canvas id="escena"></canvas>
+<div id="etiquetas"></div>
+
+<header class="topbar">
+  <a class="mark" href="../index.html">Monte <em>Verde</em></a>
+  <select id="selector" aria-label="Pieza"></select>
+  <span class="spacer"></span>
+  <button class="chip" id="verPanel">Panel</button>
+  <span class="chip sage" id="estado">—</span>
+</header>
+
+<div id="panel">
+  <h3>Luz</h3>
+  <div class="rosa" id="rosa"><div class="rayo" id="rayo"></div><div class="centro"></div></div>
+  <div class="fila">
+    <button class="btn" id="relieve">Sin textura</button>
+    <button class="btn" id="encuadre">Centrar</button>
+  </div>
+
+  <hr>
+  <h3>Marcas</h3>
+  <button class="btn" id="marcar">Marcar puntos</button>
+  <div class="fila">
+    <button class="btn" id="trazo">Nuevo trazo</button>
+    <button class="btn" id="deshacer">Deshacer</button>
+  </div>
+  <div id="lista"></div>
+
+  <hr>
+  <h3>Medidas</h3>
+  <div id="medidas"></div>
+
+  <hr>
+  <h3>Datos</h3>
+  <textarea id="json" spellcheck="false">—</textarea>
+  <div class="fila">
+    <button class="btn" id="copiar">Copiar</button>
+    <button class="btn" id="pegar">Cargar</button>
+  </div>
+  <button class="btn" id="borrar">Borrar todo</button>
+</div>
+
+<div id="cargando">Cargando…</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+const $ = id => document.getElementById(id);
+const COLORES = ['#e9a93c', '#7cc4ff', '#8ce99a', '#ff8fa3', '#d0bfff', '#ffd43b'];
+
+const CAT = await fetch('../assets/data/catalogo.json', { cache: 'no-cache' }).then(r => r.json());
+const PIEZAS = CAT.piezas.filter(p => p.media?.modelo);
+
+$('selector').innerHTML = PIEZAS
+  .map(p => `<option value="${p.codigo}">${p.denominacion}</option>`).join('');
+
+// ---------- escena
+const canvas = $('escena');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x16110c);
+const camera = new THREE.PerspectiveCamera(32, innerWidth / innerHeight, .001, 40);
+
+const rasante = new THREE.DirectionalLight(0xfff4e2, 3.4);
+const relleno = new THREE.AmbientLight(0xffffff, .16);
+scene.add(rasante, relleno, new THREE.HemisphereLight(0x8c8c7a, 0x16110c, .22));
+
+const draco = new DRACOLoader().setDecoderPath('../assets/vendor/three/addons/libs/draco/');
+const cargador = new GLTFLoader().setDRACOLoader(draco);
+
+let pieza = null, malla = null, tam = null, esquina = null, radio = 1;
+let matOriginal = null;
+const matPlano = new THREE.MeshStandardMaterial({ color: 0xc9bfae, roughness: 1, metalness: 0 });
+
+const grupo = new THREE.Group();
+scene.add(grupo);
+const capaEtq = $('etiquetas');
+
+// trazos: cada uno es una lista de puntos con nombre. Sirven igual para marcar un punto
+// suelto, medir una distancia o encerrar un área.
+let trazos = [[]];
+let marcando = false;
+
+async function abrir(codigo) {
+  const ficha = PIEZAS.find(p => p.codigo === codigo);
+  $('cargando').style.display = 'grid';
+  $('cargando').textContent = `Cargando ${ficha.denominacion}…`;
+
+  if (pieza) { scene.remove(pieza); }
+  const g = await cargador.loadAsync('../' + ficha.media.modelo);
+  pieza = g.scene;
+  malla = null;
+  pieza.traverse(o => { if (o.isMesh && !malla) malla = o; });
+  matOriginal = malla.material;
+
+  scene.add(pieza);
+  scene.updateMatrixWorld(true);
+  const caja = new THREE.Box3().setFromObject(pieza);
+  tam = caja.getSize(new THREE.Vector3());
+  esquina = caja.min.clone();
+  pieza.position.sub(caja.getCenter(new THREE.Vector3()));
+  esquina.sub(caja.getCenter(new THREE.Vector3()));
+  scene.updateMatrixWorld(true);
+
+  radio = tam.length() * 1.5;
+  gx = 0; gy = .5; ubicarCamara(); ubicarLuz();
+
+  trazos = [[]];
+  redibujar();
+  $('estado').textContent = `${(tam.x * 1000).toFixed(0)} × ${(tam.y * 1000).toFixed(0)} × ${(tam.z * 1000).toFixed(0)} mm`;
+  $('cargando').style.display = 'none';
+}
+
+// ---------- cámara y luz
+let gx = 0, gy = .5, acerca = 1;
+function ubicarCamara() {
+  camera.position.set(0, 0, radio / acerca);
+  camera.lookAt(0, 0, 0);
+}
+let azimut = 135, elevacion = 18;
+function ubicarLuz() {
+  const a = azimut * Math.PI / 180, e = elevacion * Math.PI / 180;
+  rasante.position.set(radio * Math.cos(e) * Math.cos(a), radio * Math.sin(e),
+                       radio * Math.cos(e) * Math.sin(a));
+  $('rayo').style.transform = `rotate(${-azimut}deg)`;
+}
+const desdeRosa = e => {
+  const r = $('rosa').getBoundingClientRect();
+  azimut = Math.atan2(-(e.clientY - r.top - r.height / 2), e.clientX - r.left - r.width / 2) * 180 / Math.PI;
+  ubicarLuz();
+};
+$('rosa').addEventListener('pointerdown', e => { $('rosa').setPointerCapture(e.pointerId); desdeRosa(e); });
+$('rosa').addEventListener('pointermove', e => { if (e.buttons) desdeRosa(e); });
+
+// girar la pieza con el dedo, como en el visor
+let arrastre = null, movido = 0;
+canvas.addEventListener('pointerdown', e => { arrastre = [e.clientX, e.clientY]; movido = 0;
+                                              canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointerup', e => {
+  if (marcando && movido < 6) marcar(e);
+  arrastre = null;
+});
+canvas.addEventListener('pointermove', e => {
+  if (!arrastre || !pieza) return;
+  const dx = e.clientX - arrastre[0], dy = e.clientY - arrastre[1];
+  movido += Math.abs(dx) + Math.abs(dy);
+  arrastre = [e.clientX, e.clientY];
+  const q = new THREE.Quaternion();
+  q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -dx * .008);
+  pieza.quaternion.premultiply(q);
+  q.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -dy * .008);
+  pieza.quaternion.premultiply(q);
+  grupo.quaternion.copy(pieza.quaternion);       // las marcas viajan con la pieza
+});
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  acerca = Math.max(.4, Math.min(6, acerca * (e.deltaY < 0 ? 1.1 : 1 / 1.1)));
+  ubicarCamara();
+}, { passive: false });
+
+// ---------- marcar sobre la superficie
+const rc = new THREE.Raycaster();
+function marcar(e) {
+  if (!malla) return;
+  const ndc = new THREE.Vector2((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  rc.setFromCamera(ndc, camera);
+  const hit = rc.intersectObject(malla, true)[0];
+  if (!hit) return;
+  const local = pieza.worldToLocal(hit.point.clone());   // se guarda en la pieza, no en la pantalla
+  trazos[trazos.length - 1].push({ p: local, nombre: '' });
+  redibujar();
+}
+
+function redibujar() {
+  grupo.clear();
+  capaEtq.innerHTML = '';
+  const geo = new THREE.SphereGeometry(tam ? tam.length() * .008 : .01, 12, 10);
+
+  trazos.forEach((trazo, t) => {
+    const color = new THREE.Color(COLORES[t % COLORES.length]);
+    const mat = new THREE.MeshBasicMaterial({ color });
+    trazo.forEach((punto, i) => {
+      const s = new THREE.Mesh(geo, mat);
+      s.position.copy(punto.p);
+      grupo.add(s);
+      const el = document.createElement('div');
+      el.className = 'etq';
+      el.innerHTML = `<i style="background:${COLORES[t % COLORES.length]}">${i + 1}</i>
+                      <span>${punto.nombre || ''}</span>`;
+      if (!punto.nombre) el.querySelector('span').remove();
+      capaEtq.appendChild(el);
+      punto.el = el;
+    });
+    if (trazo.length > 1) {
+      const g = new THREE.BufferGeometry().setFromPoints(trazo.map(q => q.p));
+      grupo.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color, depthTest: false })));
+    }
+  });
+  grupo.position.copy(pieza ? pieza.position : new THREE.Vector3());
+  grupo.quaternion.copy(pieza ? pieza.quaternion : new THREE.Quaternion());
+  pintarLista();
+  medir();
+}
+
+function pintarLista() {
+  const lista = $('lista');
+  lista.innerHTML = '';
+  trazos.forEach((trazo, t) => trazo.forEach((punto, i) => {
+    const fila = document.createElement('div'); fila.className = 'it';
+    const n = document.createElement('div'); n.className = 'n';
+    n.style.background = COLORES[t % COLORES.length];
+    n.textContent = i + 1;
+    const inp = document.createElement('input');
+    inp.value = punto.nombre; inp.placeholder = `trazo ${t + 1}`;
+    inp.addEventListener('input', () => { punto.nombre = inp.value; redibujar(); });
+    const del = document.createElement('button'); del.className = 'btn'; del.textContent = '×';
+    del.addEventListener('click', () => { trazo.splice(i, 1); redibujar(); });
+    fila.append(n, inp, del);
+    lista.appendChild(fila);
+  }));
+  if (!trazos.some(t => t.length)) lista.innerHTML =
+    '<span style="color:var(--sand-500);font-size:11px">sin marcas todavía</span>';
+}
+
+// ---------- medidas: todo en milímetros, sobre la geometría
+const mm = v => v * 1000;
+function medir() {
+  const filas = [];
+  trazos.forEach((trazo, t) => {
+    if (trazo.length < 2) return;
+    let recorrido = 0;
+    for (let i = 1; i < trazo.length; i++) recorrido += trazo[i].p.distanceTo(trazo[i - 1].p);
+    const recta = trazo[0].p.distanceTo(trazo[trazo.length - 1].p);
+    filas.push(`<div class="dato"><span>trazo ${t + 1} · recorrido</span><b>${mm(recorrido).toFixed(1)} mm</b></div>`);
+    filas.push(`<div class="dato"><span>trazo ${t + 1} · extremo a extremo</span><b>${mm(recta).toFixed(1)} mm</b></div>`);
+    if (trazo.length > 2) {
+      // área del polígono proyectado sobre su propio plano medio
+      const c = trazo.reduce((a, q) => a.add(q.p.clone()), new THREE.Vector3()).divideScalar(trazo.length);
+      let n = new THREE.Vector3();
+      for (let i = 0; i < trazo.length; i++) {
+        const a = trazo[i].p.clone().sub(c), b = trazo[(i + 1) % trazo.length].p.clone().sub(c);
+        n.add(a.cross(b));
+      }
+      filas.push(`<div class="dato"><span>trazo ${t + 1} · área</span><b>${(n.length() / 2 * 1e6).toFixed(1)} mm²</b></div>`);
+    }
+  });
+  $('medidas').innerHTML = filas.join('') ||
+    '<span style="color:var(--sand-500);font-size:11px">marca dos puntos para medir</span>';
+  volcarJson();
+}
+
+function volcarJson() {
+  const codigo = $('selector').value;
+  $('json').value = JSON.stringify({
+    pieza: codigo,
+    unidades: 'mm desde la esquina de la caja de la pieza',
+    trazos: trazos.filter(t => t.length).map((t, i) => ({
+      n: i + 1,
+      puntos: t.map((q, k) => ({
+        n: k + 1,
+        nombre: q.nombre || null,
+        xyz: [+mm(q.p.x - esquina.x).toFixed(1), +mm(q.p.y - esquina.y).toFixed(1),
+              +mm(q.p.z - esquina.z).toFixed(1)],
+      })),
+    })),
+  }, null, 1);
+}
+
+// ---------- controles
+$('marcar').addEventListener('click', () => {
+  marcando = !marcando;
+  $('marcar').classList.toggle('on', marcando);
+  canvas.classList.toggle('marcando', marcando);
+  $('marcar').textContent = marcando ? 'Terminar de marcar' : 'Marcar puntos';
+});
+$('trazo').addEventListener('click', () => { trazos.push([]); redibujar(); });
+$('deshacer').addEventListener('click', () => {
+  for (let i = trazos.length - 1; i >= 0; i--)
+    if (trazos[i].length) { trazos[i].pop(); break; }
+  redibujar();
+});
+$('borrar').addEventListener('click', () => { trazos = [[]]; redibujar(); });
+$('copiar').addEventListener('click', () => {
+  navigator.clipboard?.writeText($('json').value);
+  $('copiar').textContent = 'Copiado';
+  setTimeout(() => $('copiar').textContent = 'Copiar', 1200);
+});
+$('pegar').addEventListener('click', () => {
+  try {
+    const d = JSON.parse($('json').value);
+    trazos = (d.trazos || []).map(t => t.puntos.map(q => ({
+      nombre: q.nombre || '',
+      p: new THREE.Vector3(q.xyz[0] / 1000 + esquina.x, q.xyz[1] / 1000 + esquina.y,
+                           q.xyz[2] / 1000 + esquina.z),
+    })));
+    if (!trazos.length) trazos = [[]];
+    redibujar();
+  } catch (e) { alert('El JSON no se pudo leer: ' + e.message); }
+});
+$('relieve').addEventListener('click', e => {
+  const plano = malla.material !== matPlano;
+  malla.material = plano ? matPlano : matOriginal;
+  e.currentTarget.classList.toggle('on', plano);
+  relleno.intensity = plano ? .16 : .8;
+});
+$('encuadre').addEventListener('click', () => {
+  acerca = 1; pieza.quaternion.identity(); grupo.quaternion.identity(); ubicarCamara();
+});
+$('selector').addEventListener('change', e => abrir(e.target.value));
+
+// en pantalla angosta el panel arranca guardado
+const angosto = matchMedia('(max-width: 620px)');
+if (angosto.matches) $('panel').classList.add('plegado');
+$('verPanel').addEventListener('click', () => $('panel').classList.toggle('plegado'));
+// al tocar la pieza para marcar, el cajón estorba: se guarda solo
+canvas.addEventListener('pointerdown', () => {
+  if (marcando && angosto.matches) $('panel').classList.add('plegado');
+});
+
+// ---------- bucle
+const medirPantalla = () => {
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+};
+addEventListener('resize', medirPantalla);
+medirPantalla();
+
+await abrir(new URLSearchParams(location.search).get('id') || PIEZAS[0].codigo);
+
+renderer.setAnimationLoop(() => {
+  renderer.render(scene, camera);
+  const frente = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+  for (const trazo of trazos) for (const punto of trazo) {
+    if (!punto.el) continue;
+    const mundo = punto.p.clone().applyQuaternion(grupo.quaternion).add(grupo.position);
+    const d = mundo.clone().sub(camera.position).normalize();
+    if (d.dot(frente) <= 0) { punto.el.style.display = 'none'; continue; }
+    const v = mundo.project(camera);
+    punto.el.style.display = 'flex';
+    punto.el.style.left = ((v.x * .5 + .5) * innerWidth) + 'px';
+    punto.el.style.top = ((-v.y * .5 + .5) * innerHeight - 16) + 'px';
+  }
+});
+</script>
+</body>
+</html>

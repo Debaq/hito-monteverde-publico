@@ -1,0 +1,270 @@
+/* Hito Monte Verde — sistema visual
+   Paleta y tipografías alineadas a tmeduca.org/faunAr */
+
+/* Fuentes servidas desde el propio sitio.
+   Antes esto era un @import a fonts.googleapis.com, que encadenaba tres viajes antes
+   de la primera letra (HTML -> app.css -> CSS de Google -> woff2) y dejaba la
+   tipografia del recorrido colgando de una red que en sala puede no estar. */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 700;            /* variable: un archivo cubre todos los pesos */
+  font-display: swap;
+  src: url('../fonts/fraunces-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 700;            /* variable: un archivo cubre todos los pesos */
+  font-display: swap;
+  src: url('../fonts/fraunces-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400 700;            /* variable: un archivo cubre todos los pesos */
+  font-display: swap;
+  src: url('../fonts/plus-jakarta-sans-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400 700;            /* variable: un archivo cubre todos los pesos */
+  font-display: swap;
+  src: url('../fonts/plus-jakarta-sans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  --soil:        #16110C;
+  --soil-mid:    #211A12;
+  --soil-soft:   #2C2318;
+  --line:        #3A2F20;
+  --ochre:       #D08303;
+  --ochre-light: #E9A93C;
+  --ochre-glow:  rgba(208,131,3,.28);
+  --sage:        #8C8C7A;
+  --sage-light:  #B7B7A4;
+  --crimson:     #9E1B32;
+  --cream:       #F6F1E8;
+  --sand-300:    #D9CFBE;
+  --sand-500:    #9E9284;
+
+  --radius:    14px;
+  --radius-lg: 22px;
+  --radius-pill: 100px;
+
+  --glass-bg:     rgba(33,26,18,.62);
+  --glass-border: rgba(208,131,3,.20);
+  --glass-blur:   blur(18px);
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.30);
+  --shadow-md: 0 6px 24px rgba(0,0,0,.42);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.55);
+
+  --t-fast: 150ms ease;
+  --t-base: 250ms ease;
+
+  --serif: Fraunces, Georgia, serif;
+  --sans:  'Plus Jakarta Sans', system-ui, sans-serif;
+
+  --gutter: 16px;
+  --max:    1180px;
+  --bar-h:  64px;
+}
+
+* { box-sizing: border-box; }
+
+/* El teclado tiene que ver dónde está parado. No había ninguna regla de foco en todo
+   el sistema, así que recorrer la página con tabulador era a ciegas. */
+:focus-visible {
+  outline: 2px solid var(--ochre-light);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--soil);
+  color: var(--sand-300);
+  font: 400 16px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* halo cálido al tope, como el sitio de referencia */
+body::before {
+  content: '';
+  position: fixed; inset: 0 0 auto 0; height: 60vh;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(208,131,3,.13) 0%, transparent 62%);
+  pointer-events: none; z-index: 0;
+}
+
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; color: var(--cream);
+             letter-spacing: -.01em; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(30px, 6vw, 48px); }
+h2 { font-size: clamp(22px, 4vw, 30px); }
+h3 { font-size: 18px; }
+p  { margin: 0 0 14px; }
+a  { color: var(--ochre-light); text-decoration: none; }
+
+.wrap { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); position: relative; z-index: 1; }
+.muted { color: var(--sand-500); }
+.serif { font-family: var(--serif); }
+
+/* ---------- barra superior ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 30; height: var(--bar-h);
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 var(--gutter);
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .mark { font-family: var(--serif); font-weight: 700; color: var(--cream);
+                font-size: 16px; letter-spacing: -.01em; white-space: nowrap; }
+.topbar .mark em { color: var(--ochre); font-style: normal; }
+.topbar .spacer { flex: 1; }
+.topbar .volver { display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+                  font: 600 12px var(--sans); }
+.topbar .volver:hover { border-color: var(--ochre); color: var(--ochre-light); }
+
+/* ---------- chips ---------- */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(208,131,3,.16); color: var(--ochre-light);
+  border-radius: var(--radius-pill); padding: 5px 12px;
+  font-size: 11.5px; font-weight: 600; letter-spacing: .04em;
+}
+.chip.sage    { background: rgba(140,140,122,.18); color: var(--sage-light); }
+.chip.crimson { background: rgba(158,27,50,.18);   color: #E8899B; }
+.chip.ghost   { background: transparent; color: var(--sand-500); border: 1px solid var(--line); }
+
+/* El atributo hidden tiene que ganarle siempre: .btn y compañía traen su propio display
+   y, sin esto, un botón con hidden igual se ve (pasaba con "Puntos" en la cámara AR). */
+[hidden] { display: none !important; }
+
+/* ---------- botones ---------- */
+/* touch-action: manipulation apaga el zoom por doble toque sobre cualquier control.
+   En el telefono, dos toques seguidos en un boton (subir el zoom, girar la pieza) le
+   hacian zoom a la pagina entera y ademas metian 300 ms de espera antes del click. */
+.btn, .chip, button, select, summary, [role="button"] { touch-action: manipulation; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 13px 20px; border-radius: var(--radius);
+  border: 1px solid var(--line); background: var(--soil-soft); color: var(--cream);
+  font: 600 14.5px var(--sans); cursor: pointer; text-align: center;
+  transition: border-color var(--t-fast), background var(--t-fast), transform var(--t-fast);
+}
+.btn:hover { border-color: var(--ochre); }
+.btn:active { transform: translateY(1px); }
+.btn.primary {
+  background: linear-gradient(180deg, var(--ochre-light), var(--ochre));
+  border-color: transparent; color: #241601;
+  box-shadow: 0 6px 20px var(--ochre-glow);
+}
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.block { width: 100%; }
+.btn svg { width: 18px; height: 18px; flex: none; }
+
+/* ---------- tarjetas ---------- */
+.card {
+  background: var(--soil-mid); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: 20px;
+}
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); }
+
+/* tarjeta de pieza */
+.piece .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.piece {
+  display: flex; flex-direction: column; overflow: hidden; padding: 0;
+  text-decoration: none; color: inherit;
+  transition: border-color var(--t-base), transform var(--t-base), box-shadow var(--t-base);
+}
+.piece:hover { border-color: var(--ochre); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.piece .thumb {
+  aspect-ratio: 4 / 3; background: var(--soil-soft) center/cover no-repeat;
+  border-bottom: 1px solid var(--line); position: relative;
+}
+.piece .thumb .tag { position: absolute; top: 10px; right: 10px; }
+.piece .body { padding: 15px 16px 17px; }
+.piece .code { font-size: 11px; letter-spacing: .08em; color: var(--sand-500); font-weight: 600; }
+.piece h3 { margin: 4px 0 6px; }
+.piece .meta { font-size: 13px; color: var(--sand-500); }
+
+/* ---------- ficha de pieza ---------- */
+.stage {
+  position: relative; background: radial-gradient(70% 70% at 50% 45%, var(--soil-soft), var(--soil));
+  border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden;
+  aspect-ratio: 1 / 1; max-height: 62vh;
+}
+.stage model-viewer, .stage img { width: 100%; height: 100%; display: block; }
+.stage img { object-fit: contain; }
+.stage .badge { position: absolute; left: 14px; top: 14px; z-index: 2; }
+.stage .hint {
+  position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+  background: rgba(22,17,12,.72); border: 1px solid var(--line); color: var(--sand-500);
+  padding: 6px 13px; border-radius: var(--radius-pill); font-size: 12px;
+  backdrop-filter: blur(8px); pointer-events: none;
+  transition: opacity var(--t-base);
+}
+
+.datos { display: grid; gap: 1px; margin: 0; background: var(--line); border: 1px solid var(--line);
+         border-radius: var(--radius); overflow: hidden; }
+.datos div { background: var(--soil-mid); padding: 12px 15px; display: flex; gap: 14px;
+             justify-content: space-between; align-items: baseline; }
+.datos dt { color: var(--sand-500); font-size: 12.5px; letter-spacing: .03em; }
+.datos dd { margin: 0; color: var(--cream); font-size: 14.5px; text-align: right; font-weight: 500; }
+
+/* barra de escala de dimensiones */
+.escala { display: flex; align-items: flex-end; gap: 10px; height: 74px;
+          margin: 28px 0 24px; }
+.escala .b { flex: 1; background: linear-gradient(180deg, var(--ochre), rgba(208,131,3,.25));
+             border-radius: 5px 5px 0 0; position: relative; min-height: 6px; }
+.escala .b span { position: absolute; top: -19px; left: 0; right: 0; text-align: center;
+                  font-size: 11px; color: var(--sand-500); }
+.escala .b i { position: absolute; bottom: -20px; left: 0; right: 0; text-align: center;
+               font-size: 10.5px; letter-spacing: .06em; color: var(--sand-500); font-style: normal; }
+
+/* ---------- navegación entre piezas ---------- */
+.pager { display: flex; gap: 10px; }
+.pager .btn { flex: 1; min-width: 0; }
+.pager .btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- hero de portada ---------- */
+.hero { text-align: center; padding: clamp(34px, 8vw, 70px) 0 30px; }
+.hero p.lead { max-width: 640px; margin: 14px auto 0; color: var(--cream); font-size: 17px; }
+
+/* ---------- pie ---------- */
+.foot { margin-top: 46px; padding: 26px 0 40px; border-top: 1px solid var(--line);
+        color: var(--sand-500); font-size: 13px; text-align: center; }
+
+.stack  { display: grid; gap: 14px; }
+.stack2 { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+@media (max-width: 560px) { .stack2 { grid-template-columns: 1fr; } }
+
+.section-title { display: flex; align-items: center; gap: 12px; margin: 34px 0 16px; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* En las paginas de lienzo el gesto lo maneja la escena 3D, no el navegador: ahi se
+   apaga el doble toque en toda la pagina, no solo sobre los botones. */
+.lienzo { touch-action: manipulation; }
+
+/* ---------- paginas de lienzo completo ----------
+   Arrastrar sobre el 3D seleccionaba el texto de la interfaz de encima: quedaba todo
+   resaltado en azul a la primera pasada de dedo. Se apaga la seleccion salvo donde hay
+   texto que alguien puede querer copiar. */
+.lienzo { user-select: none; -webkit-user-select: none; }
+.lienzo #hoja, .lienzo .datos, .lienzo .cita, .lienzo #consigna p {
+  user-select: text; -webkit-user-select: text;
+}

@@ -1,0 +1,68 @@
+{
+  "title": "Hito Monte Verde: ruta interactiva web con realidad aumentada para la colección arqueológica de Monte Verde",
+  "upload_type": "software",
+  "version": "v1.0.0",
+  "publication_date": "2026-09-25",
+  "language": "spa",
+  "license": "MIT",
+  "access_right": "open",
+  "description": "<p>Sitio web móvil que acompaña un recorrido físico del programa <em>Restitución e Instalación del Patrimonio Arqueológico Monte Verde</em> (GORE Los Lagos / SERPAT / Universidad Austral de Chile, Sede Puerto Montt). En cada estación hay un marcador ArUco en la pared: el visitante lo apunta con el teléfono y ve la pieza en realidad aumentada, en 3D o en fotografía, sin instalar aplicaciones.</p><p>Incluye fichas de 15 piezas de la colección, un visor 3D con luz rasante, nube de puntos, contorno y molde; la lectura del relieve de la huella (LCDCP-MV-02115) a partir de un mapa de altura; una panorámica 360° del sitio navegable con el giroscopio; el catálogo paginado; funcionamiento sin conexión mediante service worker; y encuesta y libro de visitas con analítica propia en PHP, sin cookies. Es HTML estático con módulos ES, sin build y sin dependencias de red: three.js, model-viewer, el decodificador Draco y js-aruco2 se sirven desde el propio sitio.</p><p><strong>Este depósito contiene sólo el código fuente y la documentación.</strong> Las imágenes, modelos 3D, panorámicas, el catálogo, los impresos, los logotipos y las tipografías no se distribuyen, por lo que el sistema no funciona completo a partir de este depósito. El sitio en funcionamiento puede verse en <a href=\"https://tecmedhub.org/hitomonteverde/\">https://tecmedhub.org/hitomonteverde/</a>.</p><p>Desarrollado por TecMedHub (Laboratorio de Prototipado Avanzado de la Universidad Austral de Chile, Sede Puerto Montt).</p>",
+  "creators": [
+    {
+      "name": "Baier-Quezada, Nicolás",
+      "affiliation": "Universidad Austral de Chile",
+      "orcid": "0000-0003-2818-0990"
+    },
+    {
+      "name": "Uribe-Hernandez, Vanessa",
+      "affiliation": "Universidad Austral de Chile",
+      "orcid": "0009-0003-0795-7921"
+    },
+    {
+      "name": "Lopez-Moncada, Fernanda",
+      "affiliation": "Universidad Austral de Chile",
+      "orcid": "0000-0002-0810-7684"
+    },
+    {
+      "name": "Barrientos-Toledo, Haydee",
+      "affiliation": "Universidad Austral de Chile",
+      "orcid": "0000-0002-3306-4161"
+    },
+    {
+      "name": "Alvarez-Abel, Ricardo",
+      "affiliation": "Universidad Austral de Chile",
+      "orcid": "0000-0003-2089-2037"
+    },
+    {
+      "name": "Alvarez, Marco",
+      "affiliation": "Universidad Austral de Chile"
+    }
+  ],
+  "keywords": [
+    "Monte Verde",
+    "arqueología",
+    "archaeology",
+    "patrimonio arqueológico",
+    "realidad aumentada",
+    "augmented reality",
+    "WebAR",
+    "ArUco",
+    "three.js",
+    "modelos 3D",
+    "museo",
+    "divulgación científica",
+    "Chile"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/Debaq/hito-monteverde-publico",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "https://tecmedhub.org/hitomonteverde/",
+      "relation": "isDocumentedBy",
+      "resource_type": "other"
+    }
+  ]
+}

@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Realidad aumentada — Monte Verde</title>
+<meta name="theme-color" content="#16110C">
+<meta name="description" content="Apunta al código de cada estación y la pieza aparece sobre él.">
+<link rel="icon" href="assets/marca/icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/marca/icono.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hito Monte Verde">
+<meta property="og:locale" content="es_CL">
+<meta property="og:title" content="Realidad aumentada — Monte Verde">
+<meta property="og:description" content="Apunta al código de cada estación y la pieza aparece sobre él.">
+<meta property="og:image" content="assets/marca/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="assets/css/app.css?v=41">
+<link rel="stylesheet" href="assets/css/ar.css?v=41">
+<script src="assets/vendor/js-aruco2/cv.js"></script>
+<script src="assets/vendor/js-aruco2/aruco.js"></script>
+<script src="assets/vendor/js-aruco2/dictionaries/aruco_4x4_1000.js"></script>
+<script src="assets/vendor/js-aruco2/svd.js"></script>
+<script src="assets/vendor/js-aruco2/posit1.js"></script>
+<script type="importmap">
+{"imports":{"three":"./assets/vendor/three/three.module.js",
+            "three/addons/":"./assets/vendor/three/addons/"}}
+</script>
+</head>
+<body class="lienzo">
+
+<video id="video" playsinline muted></video>
+<canvas id="tres"></canvas>
+<header class="topbar" id="barraSup">
+  <span class="mark">Monte <em>Verde</em></span>
+  <span class="spacer"></span>
+  <span class="chip sage" id="chipPieza">Realidad aumentada</span>
+</header>
+<div id="hud">buscando un código…</div>
+<div id="tocar">
+  <button class="btn" id="mas" aria-label="Agrandar la pieza" title="Agrandar (+)">+</button>
+  <button class="btn" id="menos" aria-label="Achicar la pieza" title="Achicar (−)">−</button>
+  <span class="sep"></span>
+  <button class="btn" id="giroIzq" aria-label="Girar a la izquierda" title="Girar ←">↺</button>
+  <button class="btn" id="giroDer" aria-label="Girar a la derecha" title="Girar →">↻</button>
+  <span class="sep"></span>
+  <button class="btn" id="incMas" aria-label="Inclinar hacia atrás" title="Inclinar ↑">⌃</button>
+  <button class="btn" id="incMenos" aria-label="Inclinar hacia adelante" title="Inclinar ↓">⌄</button>
+  <span class="sep"></span>
+  <button class="btn" id="cero" aria-label="Volver al ajuste original" title="Volver a cero">⟲</button>
+  <button class="btn" id="copiar" aria-label="Copiar el ajuste" title="Copiar el ajuste">⧉</button>
+</div>
+
+<div id="salto">
+  <div class="quien"><b id="saltoTitulo">—</b><span>Código de la ruta</span></div>
+  <button class="btn" id="saltoNo">Ahora no</button>
+  <a class="btn primary" id="saltoSi" href="#">Abrir</a>
+</div>
+
+<div id="reconocida">
+  <div class="quien">
+    <b id="nombrePieza">—</b>
+    <span id="modo">Apunta al código de la estación</span>
+  </div>
+  <button class="btn" id="puntos" hidden>Puntos</button>
+  <button class="btn" id="congelar">Congelar</button>
+  <button class="btn" id="foto" hidden>Foto</button>
+  <a class="btn" id="irFicha" href="#">Ficha</a>
+  <i class="asentar" id="asentar"></i>
+</div>
+
+<div id="falla"><div class="card">
+  <h2 id="fallaTitulo">No se pudo abrir la cámara</h2>
+  <p id="fallaTexto"></p>
+  <button class="btn primary" id="reintentar" style="margin-top:12px">Reintentar</button>
+</div></div>
+
+<div id="panel">
+  <a class="btn" href="index.html">Salir</a>
+</div>
+
+<script type="module">
+// Realidad aumentada: la cámara busca el marcador de cada estación y pone la pieza encima.
+// Cada parte vive en assets/js/ar/; aquí sólo se conectan. Se importan todas desde acá,
+// con ?v=N, porque es lo que tools/version.py mantiene al día.
+import { crearEscena } from './assets/js/ar/escena.js?v=41';
+import { cargarPieza, verNube } from './assets/js/ar/piezas.js?v=41';
+import { nubePorAltura } from './assets/js/nube.js?v=41';
+import { crearAjuste } from './assets/js/ar/ajuste.js?v=41';
+import { crearDetector } from './assets/js/ar/deteccion.js?v=41';
+import { crearSeguimiento, crearQuietud } from './assets/js/ar/seguimiento.js?v=41';
+import { montarGestos } from './assets/js/ar/gestos.js?v=41';
+import { montarSaltos } from './assets/js/ar/saltos.js?v=41';
+import { montarCamara } from './assets/js/ar/camara.js?v=41';
+import { registrar } from './assets/js/analitica.js?v=41';
+import { sacarFoto } from './assets/js/foto.js?v=41';
+import './assets/js/offline.js?v=41';
+
+const $ = id => document.getElementById(id);
+const video = $('video');
+const PARAMS = new URLSearchParams(location.search);
+const CODIGO = PARAMS.get('id');
+const DEBUG = PARAMS.has('debug');
+if (!DEBUG) $('hud').classList.add('guia');
+
+const [MARCAS, CAT] = await Promise.all([
+  fetch('assets/data/marcadores.json').then(r => r.json()),
+  fetch('assets/data/catalogo.json').then(r => r.json()),
+]);
+
+// id de marcador -> qué pieza es y cuánto mide impreso. Los de placa venían clavados en
+// 100 mm cuando se imprimen a 52: la pieza quedaba al doble de distancia.
+const PORID = new Map();
+for (const [cod, id] of Object.entries(MARCAS.placas || {}))
+  PORID.set(id, { codigo: cod, tipo: 'placa', lado_mm: MARCAS.placa_mm || 52 });
+// los de vinilo pegados en el suelo: cada uno con el tamaño al que se cortó
+for (const [cod, info] of Object.entries(MARCAS.suelo || {}))
+  PORID.set(info.id, { codigo: cod, tipo: 'suelo', lado_mm: info.lado_mm });
+
+// Marcadores que no son piezas sino atajos a otra página. El del cartel del 360 está
+// ahí porque un QR sólo lo leen algunos teléfonos, y este detector corre en todos.
+const SALTOS = new Map();
+for (const info of Object.values(MARCAS.saltos || {}))
+  SALTOS.set(info.id, info.destino);
+
+// la pieza pedida manda: se dice qué marcador buscar y se vuelve a su ficha
+if (CODIGO) {
+  const ficha = CAT.piezas.find(p => p.codigo === CODIGO);
+  const idPlaca = MARCAS.placas?.[CODIGO];
+  if (ficha) {
+    $('chipPieza').textContent = ficha.denominacion;
+    document.title = `${ficha.denominacion} en realidad aumentada — Monte Verde`;
+    $('hud').dataset.buscar = idPlaca != null ? `id ${idPlaca}` : 'de la estación';
+    const volver = document.createElement('a');
+    volver.className = 'btn';
+    volver.href = `pieza.html?id=${encodeURIComponent(CODIGO)}`;
+    volver.textContent = 'Volver a la ficha';
+    $('panel').lastElementChild.replaceWith(volver);
+  }
+}
+
+// ---------- la pieza sobre el marcador
+const escena = crearEscena($('tres'));
+const { ancla } = escena;
+let sucio = true;                    // congelada, la escena sólo se redibuja si la tocan
+let cal = null;                      // herramientas de calibración, sólo con ?debug=1
+// El punto de la nube se mide en la escena, que va en milímetros, y la pieza está
+// escalada: 1,1 mm a escala 1 es el mismo punto que usa el visor (0,0011 m). Al
+// agrandarla con los dedos, los puntos crecen con ella.
+const PUNTO_MM = 1.1;
+let nubeActual = null;
+const tamanoPunto = () => PUNTO_MM * ajuste.valores.escala;
+
+const ajuste = crearAjuste(() => {
+  ajuste.aplicar(ancla.children[0]);
+  if (nubeActual) nubeActual.material.size = tamanoPunto();
+  cal?.refrescar();
+  sucio = true;
+  pintarHud();
+});
+
+let piezaActual = null;
+const contadas = new Set();          // piezas ya anotadas en la analítica
+
+async function ponerPieza(codigo) {
+  if (piezaActual === codigo) return;
+  const ficha = CAT.piezas.find(p => p.codigo === codigo);
+  if (!ficha) return;
+  piezaActual = codigo;
+  let obj;
+  try { obj = await cargarPieza(ficha); }
+  catch { piezaActual = null; return; }        // que pueda reintentar en la próxima lectura
+
+  ajuste.usar(ficha);
+  verNube(obj, false);
+  nubeActual = null;
+  ancla.clear();
+  ancla.add(obj);
+  ajuste.aplicar(obj);
+  cal?.refrescar();
+  sucio = true;
+
+  $('nombrePieza').textContent = ficha.denominacion;
+  $('modo').textContent = ficha.media?.modelo_movil
+    ? 'Congela para girarla y acercarla'
+    : 'Esta pieza no está en 3D: se muestra su fotografía';
+  // el botón sólo donde el escaneo lo justifica: lo declara la ficha
+  $('puntos').hidden = !ficha.nube?.modo;
+  $('puntos').textContent = 'Puntos';
+  $('puntos').classList.remove('primary');
+  $('irFicha').href = `pieza.html?id=${encodeURIComponent(codigo)}`;
+  // una vez por pieza y visita: si el marcador parpadea no se cuenta de nuevo
+  if (!contadas.has(codigo)) { contadas.add(codigo); registrar('ar_pieza', { pieza: codigo }); }
+  $('reconocida').classList.add('on');
+  pintarHud();
+}
+
+$('puntos').addEventListener('click', () => {
+  const si = $('puntos').textContent === 'Puntos';
+  const nube = ajuste.ficha?.nube;
+  const pts = verNube(ancla.children[0], si, malla => nubePorAltura(malla, nube, { tamano: tamanoPunto() }));
+  if (!pts) return;
+  nubeActual = si ? pts : null;
+  pts.material.size = tamanoPunto();
+  $('puntos').textContent = si ? 'Sólido' : 'Puntos';
+  $('puntos').classList.toggle('primary', si);
+  sucio = true;
+});
+
+// ---------- congelar: la pieza se suelta del marcador y se mira con los dedos
+// El escaneo es el medio, no el fin: cuando la pieza lleva un rato quieta se congela
+// sola, y queda para mirar con las dos manos en el teléfono, sin sostener el papel.
+let congelado = false;
+const quietud = crearQuietud();
+const barra = p => $('asentar').style.setProperty('--p', p);
+
+function congelar(si) {
+  if (congelado === si) return;
+  congelado = si;
+  quietud.reiniciar();
+  barra(0);
+  $('congelar').textContent = si ? 'Escanear otra' : 'Congelar';
+  $('foto').hidden = !si;              // la foto, con la pieza quieta y acomodada
+  $('congelar').classList.toggle('primary', !si);
+  document.body.classList.toggle('revisando', si);
+  $('modo').textContent = si
+    ? 'Un dedo gira · dos acercan, mueven y ladean la pieza'
+    : 'Apunta al código de la estación';
+  if (!si) seguimiento.apuntar(null);   // el ajuste no se toca: es el de la pieza, no el de la vista
+  sucio = true;
+}
+$('congelar').addEventListener('click', () => congelar(!congelado));
+
+// ---------- foto: la pieza sobre lo que ve la cámara, tal como está en pantalla
+function cuadroAr() {
+  const tres = $('tres');
+  const c = document.createElement('canvas');
+  c.width = tres.width; c.height = tres.height;
+  const ctx = c.getContext('2d');
+  const vw = video.videoWidth, vh = video.videoHeight;
+  if (vw && vh) {                      // el mismo recorte que hace object-fit: cover
+    const k = Math.max(c.width / vw, c.height / vh);
+    const sw = c.width / k, sh = c.height / k;
+    ctx.drawImage(video, (vw - sw) / 2, (vh - sh) / 2, sw, sh, 0, 0, c.width, c.height);
+  }
+  escena.dibujar();                    // recién dibujada: WebGL borra lo que ya mostró
+  ctx.drawImage(tres, 0, 0);
+  return c;
+}
+$('foto').addEventListener('click', async () => {
+  const f = ajuste.ficha;
+  if (!f) return;
+  const como = await sacarFoto(cuadroAr(), f);
+  if (como) registrar('foto', { pieza: f.codigo, detalle: como });
+});
+
+montarGestos({
+  lienzo: $('tres'), ajuste, mmPorPx: escena.mmPorPx,
+  activo: () => ajuste.ficha && (congelado || DEBUG),
+});
+
+// ---------- lectura de marcadores
+const detector = crearDetector({ video, camara: escena.camara, porId: PORID });
+const seguimiento = crearSeguimiento(ancla);
+const saltos = montarSaltos(detector.trabajo);
+
+const HZ_DETECCION = 15;             // lecturas de marcador por segundo
+const LECTURAS_PERDONADAS = 5;       // lecturas seguidas sin marcador que no reinician la cuenta
+let ids = [], lectura = null, perdido = 0;
+let tDeteccion = 0, ultimo = 0, fps = 0;
+
+function leerMarcadores(ahora) {
+  tDeteccion = ahora;
+  const r = detector.leer();
+  ids = r.ids;
+  // un atajo a la vista: se ofrece y se sigue, no interrumpe el escaneo de piezas
+  for (const id of ids) if (SALTOS.has(id)) saltos.marcador(SALTOS.get(id));
+
+  if (!r.mejor) {
+    lectura = null;
+    perdido++;
+    seguimiento.soltar();
+    // una lectura suelta perdida es normal; varias seguidas es que ya no apunta
+    if (perdido > LECTURAS_PERDONADAS) { quietud.reiniciar(); barra(0); }
+    if (perdido > HZ_DETECCION * 3) $('reconocida').classList.remove('on');   // ~3 s sin ver nada
+    return;
+  }
+
+  perdido = 0;
+  ponerPieza(r.mejor.codigo);
+  seguimiento.apuntar(r.mejor.objetivo);
+  lectura = r.mejor.lectura;
+
+  // La quietud se cuenta desde que la pieza está en pantalla, no desde que se ve el
+  // marcador: el modelo tarda en cargar, y contando antes se congelaba al segundo de
+  // aparecer.
+  if (ajuste.ficha?.codigo !== r.mejor.codigo) { quietud.reiniciar(); barra(0); return; }
+  const avance = quietud.medir(r.mejor.objetivo, lectura.dist, ahora);
+  barra(avance);
+  if (avance >= 1) congelar(true);
+}
+
+function pintarHud() {
+  // al visitante sólo se le dice qué hacer mientras no hay código a la vista
+  if (!DEBUG) {
+    $('hud').hidden = ids.length > 0 || $('reconocida').classList.contains('on');
+    $('hud').textContent = 'Apunta la cámara al código de la estación';
+    return;
+  }
+  if (cal) $('hud').textContent = cal.textoHud({ ids, fps, lectura, buscar: $('hud').dataset.buscar });
+}
+
+function cuadro(ahora) {
+  requestAnimationFrame(cuadro);
+  if (!detector.preparar()) {
+    // sin cámara no hay nada que detectar, pero con ?debug=1 se fuerza una pieza a mano
+    // y hay que seguir dibujándola: si no, la pantalla queda negra y parece que falló
+    if (DEBUG && sucio) { sucio = false; escena.dibujar(); }
+    return;
+  }
+
+  // Congelada la pieza ya no sigue al marcador, así que leer el cuadro no aporta nada.
+  // Y mientras se escanea, 15 lecturas por segundo alcanzan: detectar en cada cuadro
+  // costaba una copia de ~900 KB y una pasada de visión, que es de donde salía el calor
+  // del teléfono.
+  if (!congelado) {
+    if (ahora - tDeteccion >= 1000 / HZ_DETECCION) { leerMarcadores(ahora); pintarHud(); }
+    saltos.mirarQR(ahora);
+    seguimiento.paso();
+  }
+
+  const dt = ahora - ultimo; ultimo = ahora;
+  fps = fps * .9 + (1000 / Math.max(1, dt)) * .1;
+
+  // siguiendo el marcador la escena cambia sola; congelada, sólo si la mueven
+  if (!congelado || sucio) { sucio = false; escena.dibujar(); }
+}
+
+// ---------- calibración, sólo con ?debug=1: no se baja para el visitante
+if (DEBUG) {
+  const { montarCalibracion } = await import('./assets/js/ar/calibracion.js?v=41');
+  cal = montarCalibracion({
+    ajuste, piezas: CAT.piezas,
+    // el ancla sólo es visible con marcador a la vista; al forzar una pieza se deja ver
+    async forzarPieza(codigo) {
+      await ponerPieza(codigo);
+      ancla.position.set(0, 0, -400);
+      ancla.rotation.set(0, 0, 0);
+      ancla.visible = true;
+      sucio = true;
+    },
+  });
+}
+
+montarCamara(video, { alAbrir: () => detector.olvidarCamara(), registrar });
+
+const medir = () => {
+  escena.medir();
+  detector.alinearCamara();          // el recorte de cover cambia con la ventana
+  sucio = true;
+};
+addEventListener('resize', medir); medir();
+requestAnimationFrame(cuadro);
+</script>
+</body>
+</html>

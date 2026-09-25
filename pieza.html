@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pieza — Monte Verde</title>
+<meta name="theme-color" content="#16110C">
+<link rel="icon" href="assets/marca/icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/marca/icono.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hito Monte Verde">
+<meta property="og:locale" content="es_CL">
+<meta property="og:title" content="Piezas de la ruta — Monte Verde">
+<meta property="og:description" content="La ficha de cada pieza de la colección: modelo 3D o fotografía, dimensiones a escala y su página del catálogo.">
+<meta property="og:image" content="assets/marca/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="La ficha de cada pieza de la colección: modelo 3D o fotografía, dimensiones a escala y su página del catálogo.">
+<link rel="stylesheet" href="assets/css/app.css?v=41">
+<script type="module">
+  import { ModelViewerElement } from './assets/vendor/model-viewer/model-viewer.min.js';
+  // sin esto model-viewer se baja el decodificador Draco de gstatic.com por su cuenta,
+  // y los modelos del recorrido vienen todos comprimidos con Draco
+  ModelViewerElement.dracoDecoderLocation = 'assets/vendor/three/addons/libs/draco/';
+</script>
+<style>
+  main { padding-bottom: 40px; }
+  .cabecera { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 22px 0 6px; }
+  .cabecera .codigo { font-size: 12px; letter-spacing: .1em; color: var(--sand-500); font-weight: 600; }
+  .estacion { font-size: 12.5px; color: var(--sand-500); }
+  .descr { color: var(--cream); font-size: 16.5px; margin: 14px 0 20px; }
+  .acciones { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; margin: 18px 0 8px; }
+  .acciones .btn.block { grid-column: 1 / -1; }
+  @media (min-width: 900px) {
+    .layout { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: 26px; align-items: start; }
+    .stage { max-height: none; }
+  }
+  #error { display: none; text-align: center; padding: 50px 0; }
+  /* la chapa del lienzo lleva al visor de luz rasante */
+  .stage a.badge { text-decoration: none; transition: background var(--t-fast); }
+  .stage a.badge:hover { background: rgba(208,131,3,.30); }
+  .stage a.badge svg { width: 13px; height: 13px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="mark" href="index.html">Monte <em>Verde</em></a>
+  <span class="spacer"></span>
+  <span class="estacion" id="estacion"></span>
+</header>
+
+<main class="wrap">
+  <div id="error">
+    <h2>Pieza no encontrada</h2>
+    <p class="muted" id="errorDetalle"></p>
+    <a class="btn" href="index.html">Ver todas las piezas</a>
+  </div>
+
+  <div id="contenido" hidden>
+    <div class="layout">
+      <section>
+        <div class="stage" id="stage"></div>
+      </section>
+
+      <section>
+        <div class="cabecera">
+          <span class="codigo" id="codigo"></span>
+          <span class="chip" id="tipoMedia"></span>
+        </div>
+        <h1 id="denominacion"></h1>
+        <p class="descr" id="descripcion"></p>
+
+        <div class="acciones" id="acciones"></div>
+
+        <dl class="datos" id="datos"></dl>
+
+        <div class="card" style="margin-top:14px" id="cardEscala" hidden>
+          <div class="muted" style="font-size:12.5px;letter-spacing:.03em">Dimensiones</div>
+          <div class="escala" id="escala"></div>
+        </div>
+
+        <div id="nota"></div>
+
+        <div class="section-title"><h3>Seguir el recorrido</h3></div>
+        <div class="pager" id="pager"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="foot wrap">
+  Restitución e Instalación del Patrimonio Arqueológico Monte Verde<br>
+  GORE Los Lagos · SERPAT · UACh Puerto Montt
+</footer>
+
+<script type="module">
+import { pieza, vecinas, ruta, tieneModelo, numero } from './assets/js/catalogo.js?v=41';
+import { montarVolver, recordarPieza } from './assets/js/navegacion.js?v=41';
+import './assets/js/analitica.js?v=41';
+import './assets/js/offline.js?v=41';
+
+const params = new URLSearchParams(location.search);
+const codigo = params.get('id') || params.get('pieza');
+
+const $ = id => document.getElementById(id);
+const esc = t => String(t ?? '').replace(/[<>&"]/g, c => ({ '<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;' }[c]));
+
+function fallar(msg) {
+  $('errorDetalle').textContent = msg;
+  $('error').style.display = 'block';
+}
+
+const ICONO = {
+  ar:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M12 8.5 16 11v4.5L12 18l-4-2.5V11z"/></svg>',
+  pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
+  pano:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="12" rx="9" ry="5.5"/><path d="M12 6.5v11M3.4 10.5h17.2"/></svg>',
+  luz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.6"/><path d="M12 3v2.2M12 18.8V21M4.2 12H2M22 12h-2.2M6.3 6.3 4.8 4.8M19.2 19.2l-1.5-1.5M17.7 6.3l1.5-1.5M4.8 19.2l1.5-1.5"/></svg>',
+  prev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 6l-6 6 6 6"/></svg>',
+  next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 6l6 6-6 6"/></svg>',
+};
+
+function montarVisor(p) {
+  const stage = $('stage');
+  if (tieneModelo(p)) {
+    // cada pieza puede declarar desde dónde se mira: hay piezas que se leen de frente
+    // y otras, como la huella, desde arriba
+    const cam = p.camara || {};
+    const phi = cam.phi ?? 78;                       // 0° = justo encima, 90° = de costado
+    const giro = cam.giro ?? 48;                     // cuánto se puede girar a cada lado
+    const rango = cam.rango ?? 40;                   // cuánto se puede subir o bajar
+    // los objetos se giran enteros, como en la mano; sólo la huella se acota
+    const libre = cam.libre === true;
+    const limites = libre
+      ? 'min-camera-orbit="-Infinity 0deg auto" max-camera-orbit="Infinity 180deg auto"'
+      : `min-camera-orbit="-${giro}deg ${Math.max(1, phi - rango)}deg auto"
+         max-camera-orbit="${giro}deg ${Math.min(179, phi + rango)}deg auto"`;
+    stage.innerHTML = `
+      <model-viewer id="mv"
+        src="${esc(ruta(p.media.modelo_movil || p.media.modelo))}"
+        alt="Modelo 3D de ${esc(p.denominacion)}"
+        camera-controls touch-action="none" interaction-prompt="none"
+        loading="eager" reveal="auto"
+        ${libre ? 'auto-rotate auto-rotate-delay="900" rotation-per-second="14deg"' : ''}
+        ${limites}
+        camera-orbit="0deg ${phi}deg auto" min-field-of-view="18deg" max-field-of-view="42deg"
+        shadow-intensity="1.15" shadow-softness="0.55" exposure="1.35"
+        environment-image="neutral" ar ar-modes="scene-viewer webxr quick-look"
+        poster="${esc(ruta(p.media.imagen_movil))}">
+      </model-viewer>
+      <a class="chip badge" href="visor.html?id=${encodeURIComponent(p.codigo)}">
+        ${ICONO.luz} Ver con luz rasante</a>
+      <span class="hint" id="hint">Arrastra para girar · pellizca para acercar</span>`;
+
+    // la pista se va sola al primer toque, o a los seis segundos si nadie toca
+    const hint = $('hint');
+    const ocultar = () => { hint.style.opacity = 0; };
+    stage.addEventListener('pointerdown', ocultar, { once: true });
+    setTimeout(ocultar, 6000);
+  } else {
+    stage.innerHTML = `
+      <img src="${esc(ruta(p.media.imagen_movil || p.media.imagen))}" alt="${esc(p.denominacion)}" id="foto">
+      <span class="chip sage badge">Fotografía</span>
+      <span class="hint">Toca la imagen para ampliar</span>`;
+    // zoom simple: alterna entre contener y ampliar al punto tocado
+    const img = $('foto');
+    let ampliada = false;
+    stage.addEventListener('click', e => {
+      const r = stage.getBoundingClientRect();
+      ampliada = !ampliada;
+      img.style.objectFit = ampliada ? 'cover' : 'contain';
+      img.style.transform = ampliada ? 'scale(2.4)' : 'none';
+      img.style.transformOrigin =
+        `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+      img.style.transition = 'transform 260ms ease';
+      img.style.cursor = ampliada ? 'zoom-out' : 'zoom-in';
+    });
+  }
+}
+
+function montarDatos(p) {
+  const filas = [
+    ['Tipo de objeto', p.tipo_objeto],
+    ['Material', p.categoria_material],
+    ['Función', p.funcion],
+    ['Sitio', p.sitio],
+    ['Localidad', p.localidad],
+    ['Página del catálogo',
+     p.pagina ? `<a href="catalogo.html?p=${encodeURIComponent(p.pagina)}&desde=${encodeURIComponent(p.codigo)}">${esc(p.pagina)} →</a>` : null,
+     true],
+  ].filter(([, v]) => v != null && v !== '');
+
+  $('datos').innerHTML = filas
+    .map(([k, v, crudo]) => `<div><dt>${esc(k)}</dt><dd>${crudo ? v : esc(v)}</dd></div>`).join('');
+
+  const d = p.dimensiones || {};
+  const barras = [['largo', d.largo], ['ancho', d.ancho], ['espesor', d.espesor]]
+    .filter(([, v]) => typeof v === 'number');
+  if (barras.length) {
+    const max = Math.max(...barras.map(([, v]) => v));
+    $('escala').innerHTML = barras.map(([k, v]) =>
+      `<div class="b" style="height:${Math.max(8, (v / max) * 100)}%">
+         <span>${numero(v)} ${esc(d.unidad || 'cm')}</span><i>${esc(k)}</i>
+       </div>`).join('');
+    $('cardEscala').hidden = false;
+  }
+}
+
+function montarAcciones(p) {
+  const botones = [];
+  if (tieneModelo(p)) {
+    // el AR del recorrido es el de marcador: funciona en teléfono y en computador con webcam
+    botones.push(`<a class="btn primary block" href="ar.html?id=${encodeURIComponent(p.codigo)}">
+      ${ICONO.ar} Ver en realidad aumentada</a>`);
+  }
+  botones.push(`<a class="btn" href="panorama.html?desde=${encodeURIComponent(p.codigo)}">${ICONO.pano} Sitio 360°</a>`);
+  botones.push(`<a class="btn" href="catalogo.html?desde=${encodeURIComponent(p.codigo)}">${ICONO.pdf} Catálogo</a>`);
+  $('acciones').innerHTML = botones.join('');
+
+}
+
+async function montarPager(p) {
+  const { anterior, siguiente, indice, total } = await vecinas(p.codigo);
+  $('estacion').textContent = `Pieza ${indice + 1} de ${total}`;
+  $('pager').innerHTML = `
+    <a class="btn" href="pieza.html?id=${encodeURIComponent(anterior.codigo)}">
+      ${ICONO.prev}<span>${esc(anterior.denominacion)}</span></a>
+    <a class="btn" href="pieza.html?id=${encodeURIComponent(siguiente.codigo)}">
+      <span>${esc(siguiente.denominacion)}</span>${ICONO.next}</a>`;
+}
+
+(async () => {
+  if (!codigo) return fallar('El enlace no indica qué pieza mostrar.');
+  let p;
+  try { p = await pieza(codigo); }
+  catch (e) { return fallar(e.message); }
+  if (!p) return fallar(`El código ${codigo} no está en el catálogo.`);
+
+  document.title = `${p.denominacion} — Monte Verde`;
+  recordarPieza(p.codigo);
+  montarVolver('index.html', 'Piezas');
+  $('codigo').textContent = p.codigo;
+  $('denominacion').textContent = p.denominacion;
+  $('descripcion').textContent = p.descripcion || '';
+  $('tipoMedia').textContent = tieneModelo(p) ? 'Con modelo 3D' : 'Fotografía';
+  $('tipoMedia').className = tieneModelo(p) ? 'chip' : 'chip sage';
+
+  if (p.nota_equipo) {    // sólo se muestra lo que venga marcado para publicar
+    $('nota').innerHTML = `<div class="card" style="margin-top:14px;border-left:3px solid var(--ochre)">
+      <div class="muted" style="font-size:11px;letter-spacing:.06em;margin-bottom:6px">NOTA DEL EQUIPO</div>
+      <div style="font-size:14px;color:var(--cream)">${esc(p.nota_equipo.split(' Fuente:')[0])}</div></div>`;
+  }
+  montarVisor(p);
+  montarDatos(p);
+  montarAcciones(p);
+  await montarPager(p);
+  $('contenido').hidden = false;
+})();
+</script>
+</body>
+</html>

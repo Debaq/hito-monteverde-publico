@@ -1,0 +1,97 @@
+# Hito Monte Verde — cabeceras de caché (Apache)
+#
+# El esquema de versiones de tools/version.py sólo rinde si el servidor manda estas
+# cabeceras: el HTML se revalida siempre y todo lo que lleva ?v=N se cachea largo.
+#
+# Ojo: <meta http-equiv="cache-control"> en el HTML NO sirve. Los navegadores sólo
+# hacen caso a las cabeceras HTTP reales, que son éstas.
+
+<IfModule mod_headers.c>
+  # El HTML es lo que apunta a la versión vigente: nunca se sirve viejo.
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  # Medios y código: se renuevan cambiando ?v=N, así que pueden cachearse largo.
+  <FilesMatch "\.(glb|webp|jpg|png|svg|woff2|css|js|pdf)$">
+    Header set Cache-Control "public, max-age=31536000"
+  </FilesMatch>
+
+  # El service worker decide qué sirve el teléfono sin red: si quedara pegado uno
+  # viejo, nada de lo nuevo llegaría. Los navegadores ya lo revalidan, esto es por si acaso.
+  <FilesMatch "^sw\.js$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  # El catálogo cambia seguido y se pide sin versión.
+  <FilesMatch "(catalogo|marcadores|banderitas|catalogo-paginas)\.json$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_mime.c>
+  AddType model/gltf-binary .glb
+  AddType image/webp        .webp
+  AddType font/woff2        .woff2
+  AddType application/wasm  .wasm
+</IfModule>
+
+ErrorDocument 404 /404.html
+
+# ---------------------------------------------------------------------------
+# Qué se puede pedir y qué no
+#
+# La carpeta del proyecto no es sólo el sitio: tiene el repositorio, las
+# herramientas y la configuración de despliegue. Si la raíz web es esta carpeta,
+# todo eso queda al alcance de cualquiera que escriba la ruta.
+# ---------------------------------------------------------------------------
+
+# Sin listado de carpetas. La única que el sitio enlaza es assets/impresos/, que
+# tiene su propio index.html, así que esto no rompe nada.
+Options -Indexes
+
+# .git es lo más serio: sin esta regla, /.git/config y /.git/HEAD se leen y con
+# eso se reconstruye el repositorio completo, historia incluida.
+# Se responde 404 y no 403: un 403 confirma que la carpeta existe.
+RedirectMatch 404 (^|/)\.git(/|$)
+RedirectMatch 404 (^|/)(tools|despliegue)(/|$)
+# los datos de visitas: tienen su propio .htaccess, esto es por si no se subió
+RedirectMatch 404 (^|/)analitica/datos(/|$)
+
+# Cualquier archivo oculto: .gitignore, .gitattributes, .htaccess, .env, .DS_Store
+<FilesMatch "^\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Código y documentación interna: Apache los serviría como texto plano
+<FilesMatch "\.(py|md|bak|log)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  # que el navegador no adivine tipos: un .json no se ejecuta como script
+  Header set X-Content-Type-Options "nosniff"
+  # al salir del sitio no se filtra la ruta completa, que lleva el id de la pieza
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  # Lo que el sitio sí usa queda para el propio sitio: cámara (AR), sensores de
+  # orientación (360 y visor), WebXR (AR de model-viewer en la ficha) y portapapeles
+  # (paneles de ajuste). Lo que no usa se apaga, también para lo que venga embebido.
+  Header set Permissions-Policy "camera=(self), gyroscope=(self), accelerometer=(self), magnetometer=(self), xr-spatial-tracking=(self), clipboard-write=(self), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"
+</IfModule>
+
+# La cámara y el giroscopio exigen contexto seguro: sin HTTPS no hay AR ni 360.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>

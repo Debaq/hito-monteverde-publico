@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Consulta sobre la Colección Monte Verde</title>
+<meta name="theme-color" content="#16110C">
+<link rel="icon" href="assets/marca/icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/marca/icono.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hito Monte Verde">
+<meta property="og:locale" content="es_CL">
+<meta property="og:title" content="Consulta en línea sobre la Colección Monte Verde">
+<meta property="og:description" content="Unas preguntas sobre Monte Verde y la visita a su colección.">
+<meta property="og:image" content="assets/marca/compartir.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Unas preguntas sobre Monte Verde y la visita a su colección.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="assets/css/app.css?v=41">
+<style>
+  .logo { display: inline-block; margin-bottom: 14px; }
+  .logo img { display: block; height: 84px; width: auto; }
+
+  .consulta { display: grid; gap: 16px; margin-top: 20px; }
+  .consulta fieldset { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--soil-mid);
+                       margin: 0; padding: 16px 18px 18px; min-width: 0; }
+  .consulta legend { padding: 0 6px; font: 600 15px var(--serif); color: var(--ochre-light); }
+  .pregunta { display: grid; gap: 9px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .pregunta:first-of-type { border-top: 0; padding-top: 4px; }
+  .pregunta > p { margin: 0; color: var(--cream); font-size: 15px; line-height: 1.45; }
+  .pregunta .ayuda { color: var(--sand-500); font-size: 12.5px; }
+
+  .campo { display: grid; gap: 6px; font-size: 13.5px; color: var(--sand-300); }
+  .campo + .campo { margin-top: 12px; }
+  .consulta input[type=text], .consulta input[type=email], .consulta input[type=tel] {
+    font: 400 16px/1.4 var(--sans); color: var(--cream); background: var(--soil);
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; width: 100%;
+    box-sizing: border-box; }
+  .consulta input:focus { outline: none; border-color: var(--ochre); }
+
+  /* opciones como botones grandes: se tocan con el pulgar en la visita */
+  .opciones { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opciones label { position: relative; }
+  .opciones input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .opciones span { display: inline-block; padding: 9px 15px; border-radius: var(--radius-pill);
+                   border: 1px solid var(--line); background: var(--soil); color: var(--sand-300);
+                   font-size: 14px; transition: background var(--t-fast), border-color var(--t-fast); }
+  .opciones input:checked + span { background: rgba(208,131,3,.18); border-color: var(--ochre); color: var(--cream); }
+  .opciones input:focus-visible + span { outline: 2px solid var(--ochre); outline-offset: 2px; }
+  /* "puntaje" y no "escala": app.css ya usa .escala para el gráfico de medidas de la ficha */
+  .puntaje span { min-width: 44px; text-align: center; padding-left: 0; padding-right: 0; }
+  .palabras { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+
+  .trampa { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .enviar { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+  .aviso { margin: 0; font-size: 14px; }
+  .aviso.mal { color: #E8899B; }
+  .falta > p { color: #E8899B; }
+  .gracias { text-align: center; padding: 30px 18px; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="mark" href="index.html">Monte <em>Verde</em></a>
+  <span class="spacer"></span>
+  <span class="chip">Consulta</span>
+</header>
+
+<main class="wrap">
+  <section class="hero" style="padding-bottom:6px">
+    <span class="logo"><img src="assets/marca/logo-uach-blanco.webp" alt="Universidad Austral de Chile" width="133" height="84"></span>
+    <h1>Consulta en Línea sobre Colección Monte Verde</h1>
+  </section>
+
+  <!-- El texto de la consulta es el que entregó el proyecto: no se reescribe ni se le
+       agregan preguntas, aclaraciones ni bloques. Sin datos personales (nombre, contacto,
+       organización): para pedirlos hay que verlo antes con jurídica. -->
+  <form class="consulta" id="consulta" novalidate>
+    <fieldset>
+      <legend>Conocimientos sobre Monte Verde</legend>
+
+      <div class="pregunta" data-p="visito"><p>1. ¿Ha visitado físicamente el sitio arqueológico Monte Verde?</p>
+        <div class="opciones"><label><input type="radio" name="visito" value="si"><span>Sí</span></label>
+          <label><input type="radio" name="visito" value="no"><span>No</span></label></div></div>
+
+      <div class="pregunta" data-p="vio_objetos"><p>2. ¿Ha visto objetos arqueológicos provenientes de este sitio?</p>
+        <div class="opciones"><label><input type="radio" name="vio_objetos" value="si"><span>Sí</span></label>
+          <label><input type="radio" name="vio_objetos" value="no"><span>No</span></label></div></div>
+
+      <div class="pregunta" data-p="como_vio"><p>3. ¿Los ha visto físicamente o representados en fotografías / ilustraciones?</p>
+        <div class="opciones"><label><input type="radio" name="como_vio" value="fisicamente"><span>Físicamente</span></label>
+          <label><input type="radio" name="como_vio" value="imagen"><span>Imagen</span></label></div></div>
+
+      <div class="pregunta" data-p="cuanto_sabe"><p>4. ¿Cuánto sabe sobre el sitio Monte Verde?</p>
+        <span class="ayuda">Calificar de 1 a 5</span>
+        <div class="opciones puntaje" data-escala="cuanto_sabe"></div></div>
+
+      <div class="pregunta" data-p="registro"><p>5. El sitio Monte Verde posee un registro arqueológico compuesto por:</p>
+        <div class="opciones">
+          <label><input type="checkbox" name="registro" value="megafauna"><span>Huesos de megafauna</span></label>
+          <label><input type="checkbox" name="registro" value="piedra"><span>Herramientas de piedra</span></label>
+          <label><input type="checkbox" name="registro" value="madera"><span>Herramientas de madera</span></label>
+          <label><input type="checkbox" name="registro" value="fibras"><span>Herramientas de fibras vegetales</span></label>
+          <label><input type="checkbox" name="registro" value="cuero"><span>Cuero y/o restos de carne</span></label>
+        </div></div>
+
+      <div class="pregunta" data-p="cuantas_piezas"><p>6. ¿Sabe cuántas piezas componen la colección Monte Verde?</p>
+        <div class="opciones"><label><input type="radio" name="cuantas_piezas" value="0-100"><span>0 a 100</span></label>
+          <label><input type="radio" name="cuantas_piezas" value="100-1000"><span>100 a 1.000</span></label>
+          <label><input type="radio" name="cuantas_piezas" value="mas-1000"><span>Más de 1.000</span></label></div></div>
+
+      <div class="pregunta" data-p="museo"><p>7. ¿Cree necesario que Puerto Montt cuente con un Museo especializado en poblamiento antiguo?</p>
+        <div class="opciones"><label><input type="radio" name="museo" value="si"><span>Sí</span></label>
+          <label><input type="radio" name="museo" value="no"><span>No</span></label></div></div>
+
+      <div class="pregunta" data-p="museo_donde"><p>8. Si está de acuerdo ¿Dónde debiese estar este Museo?</p>
+        <label class="campo">Escriba un sector en particular:
+          <input type="text" name="museo_donde" maxlength="160"></label></div>
+
+      <div class="pregunta" data-p="identidad"><p>9. ¿Cree que Monte Verde forma parte de la identidad cultural de Puerto Montt?</p>
+        <div class="opciones"><label><input type="radio" name="identidad" value="si"><span>Sí</span></label>
+          <label><input type="radio" name="identidad" value="no"><span>No</span></label></div></div>
+
+      <div class="pregunta" data-p="falta_espacios"><p>10. ¿Cree que aún falta incorporar elementos del sitio Monte Verde en los espacios públicos de Puerto Montt y la comuna?</p>
+        <div class="opciones"><label><input type="radio" name="falta_espacios" value="si"><span>Sí</span></label>
+          <label><input type="radio" name="falta_espacios" value="no"><span>No</span></label></div>
+        <label class="campo">Si es así, ¿dónde?:
+          <input type="text" name="espacios_donde" maxlength="160"></label></div>
+
+      <div class="pregunta" data-p="nota_visita"><p>11. Califique la experiencia de la visita a la Colección Monte Verde, escala 1 a 5</p>
+        <div class="opciones puntaje" data-escala="nota_visita"></div></div>
+
+      <div class="pregunta" data-p="palabras"><p>12. Escriba 3 palabras o conceptos sobre la experiencia que ha vivido hoy</p>
+        <div class="palabras">
+          <input type="text" name="palabras" maxlength="40" aria-label="Primera palabra">
+          <input type="text" name="palabras" maxlength="40" aria-label="Segunda palabra">
+          <input type="text" name="palabras" maxlength="40" aria-label="Tercera palabra">
+        </div></div>
+    </fieldset>
+
+    <label class="trampa" aria-hidden="true">No completar <input type="text" name="web" tabindex="-1" autocomplete="off"></label>
+
+    <div class="enviar">
+      <button class="btn primary" type="submit" id="enviar">Enviar respuestas</button>
+      <p class="aviso" id="aviso" role="status"></p>
+    </div>
+  </form>
+
+  <div style="margin-top:22px"><a class="btn" href="index.html">Volver a las piezas</a></div>
+</main>
+
+<footer class="foot wrap">
+  Restitución e Instalación del Patrimonio Arqueológico Monte Verde<br>
+  GORE Los Lagos · SERPAT · UACh Puerto Montt
+</footer>
+
+<script type="module">
+import { montarVolver, origen } from './assets/js/navegacion.js?v=41';
+import './assets/js/analitica.js?v=41';
+import './assets/js/offline.js?v=41';
+
+const $ = id => document.getElementById(id);
+const ENCUESTA = 'analitica/encuesta.php';
+const abierta = performance.now();     // el servidor descarta lo que llega demasiado rápido: robots
+const form = $('consulta');
+
+{ const d = origen(); montarVolver(d ? d.url : 'index.html', d ? 'Volver a la pieza' : 'Inicio'); }
+
+// las escalas de 1 a 5
+for (const caja of document.querySelectorAll('[data-escala]'))
+  caja.innerHTML = [1, 2, 3, 4, 5].map(n =>
+    `<label><input type="radio" name="${caja.dataset.escala}" value="${n}"><span>${n}</span></label>`).join('');
+
+const valor = nombre => form.querySelector(`input[name="${nombre}"]:checked`)?.value || '';
+// lo marcado en rojo se apaga apenas se responde
+const apagar = e => { let el = e.target; while ((el = el.closest('.falta'))) el.classList.remove('falta'); };
+form.addEventListener('change', apagar);
+form.addEventListener('input', apagar);
+
+// las obligatorias, con lo que corresponde a cada una
+const OBLIGATORIAS = ['visito', 'vio_objetos', 'cuanto_sabe', 'cuantas_piezas', 'museo', 'identidad',
+                      'falta_espacios', 'nota_visita'];
+
+function respuestas() {
+  const r = { web: form.web.value, ms: Math.round(performance.now() - abierta) };
+  for (const k of ['museo_donde', 'espacios_donde'])
+    r[k] = form[k].value.trim();
+  for (const k of ['visito', 'vio_objetos', 'como_vio', 'cuantas_piezas', 'museo', 'identidad', 'falta_espacios'])
+    r[k] = valor(k);
+  for (const k of ['cuanto_sabe', 'nota_visita']) r[k] = valor(k) ? +valor(k) : null;
+  r.registro = [...form.querySelectorAll('input[name="registro"]:checked')].map(i => i.value);
+  r.palabras = [...form.querySelectorAll('input[name="palabras"]')].map(i => i.value.trim()).filter(Boolean);
+  return r;
+}
+
+function faltantes(r) {
+  const f = OBLIGATORIAS.filter(k => r[k] === '' || r[k] === null);
+  if (!r.palabras.length) f.push('palabras');
+  return f;
+}
+
+const aviso = (txt, mal = false) => { $('aviso').textContent = txt; $('aviso').classList.toggle('mal', mal); };
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const r = respuestas();
+  for (const el of form.querySelectorAll('.falta')) el.classList.remove('falta');
+  const f = faltantes(r);
+  if (f.length) {
+    const primera = form.querySelector(`[data-p="${f[0]}"]`);
+    for (const k of f) form.querySelector(`[data-p="${k}"]`)?.classList.add('falta');
+    aviso(f.length === 1 ? 'Falta una respuesta, marcada en rojo.' : `Faltan ${f.length} respuestas, marcadas en rojo.`, true);
+    primera?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  $('enviar').disabled = true;
+  aviso('Enviando…');
+  try {
+    const res = await fetch(ENCUESTA, { method: 'POST', body: JSON.stringify(r),
+                                        headers: { 'Content-Type': 'application/json' } });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok || !j.ok) throw Object.assign(new Error(j.error || 'No se pudo enviar.'), { delServidor: true });
+    form.outerHTML = `<div class="card gracias">
+      <h2>¡Gracias por responder!</h2>
+      <p class="muted">Tus respuestas quedaron guardadas.</p></div>`;
+    scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    // las respuestas quedan en el formulario: con señal, basta volver a tocar el botón
+    aviso(err.delServidor ? err.message
+                          : 'No se pudo enviar: parece que no hay señal. Tus respuestas siguen aquí, prueba de nuevo.', true);
+    $('enviar').disabled = false;
+  }
+});
+</script>
+</body>
+</html>
