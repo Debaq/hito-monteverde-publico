@@ -62,7 +62,7 @@ cómo se generó cada archivo.
 - Fernanda Lopez-Moncada — [0000-0002-0810-7684](https://orcid.org/0000-0002-0810-7684)
 - Haydee Barrientos-Toledo — [0000-0002-3306-4161](https://orcid.org/0000-0002-3306-4161)
 - Ricardo Alvarez-Abel — [0000-0003-2089-2037](https://orcid.org/0000-0003-2089-2037)
-- Marco Alvarez
+- Marco Alvarez — [0000-0002-6652-6465](https://orcid.org/0000-0002-6652-6465)
 
 TecMedHub, Universidad Austral de Chile (Sede Puerto Montt).
 
