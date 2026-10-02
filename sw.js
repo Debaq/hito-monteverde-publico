@@ -33,7 +33,7 @@ const ESQUELETO = [
   'assets/fonts/plus-jakarta-sans-latin.woff2', 'assets/fonts/plus-jakarta-sans-latin-ext.woff2',
   'assets/marca/icono.svg', 'assets/marca/logo-uach-blanco.webp',
   'assets/marca/equipo/debaq.webp', 'assets/marca/equipo/vanne11.webp',
-  'assets/marca/equipo/fernandandreatm.webp', 'assets/marca/equipo/pukem.webp',
+  'assets/marca/equipo/fernandandreatm.webp',
   'assets/data/catalogo.json', 'assets/data/marcadores.json',
   'assets/data/banderitas.json', 'assets/data/catalogo-paginas.json',
   'assets/vendor/three/three.module.js', 'assets/vendor/three/three.core.js',
